@@ -1,7 +1,6 @@
 package com.bobo.storage.core.song;
 
 import com.bobo.semantic.UnitTest;
-import com.diffplug.common.base.Strings;
 import java.time.LocalDateTime;
 import java.util.Random;
 import org.junit.jupiter.api.Assertions;
@@ -45,7 +44,7 @@ class SongTest {
 		void url() {
 			// Given
 			String url =
-					"https://" + Strings.repeat("c", 2048 - "https://".length() - ".com".length()) + ".com";
+					"https://" + "c".repeat(2048 - "https://".length() - ".com".length()) + ".com";
 			// When
 			Song song = new Song(url);
 			// Then
@@ -57,7 +56,7 @@ class SongTest {
 		@Test
 		void normalised() {
 			// Given
-			String url = Strings.repeat(" ", 1024) + "https://b.com" + Strings.repeat(" ", 1024);
+			String url = " ".repeat(1024) + "https://b.com" + " ".repeat(1024);
 			// When
 			Song song = new Song(url);
 			// Then
@@ -79,7 +78,7 @@ class SongTest {
 		@Test
 		void rejectLongUrls() {
 			// Given
-			String suspiciouslyLongUrl = "https://" + Strings.repeat("c", 2048) + ".com";
+			String suspiciouslyLongUrl = "https://" + "c".repeat(2048) + ".com";
 			// Then
 			Assertions.assertThrows(
 					IllegalArgumentException.class,
@@ -134,7 +133,7 @@ class SongTest {
 			// Given
 			Song song = mother.get();
 			String title = "Same Soul";
-			title += Strings.repeat("c", 256 - title.length());
+			title += "c".repeat(256 - title.length());
 			// When
 			song.setTitle(title);
 			// Then
@@ -157,7 +156,7 @@ class SongTest {
 		void normalised() {
 			// Given
 			Song song = mother.get();
-			String title = Strings.repeat(" ", 128) + "Same Soul" + Strings.repeat(" ", 128);
+			String title = " ".repeat(128) + "Same Soul" + " ".repeat(128);
 			// When
 			song.setTitle(title);
 			// Then
@@ -181,7 +180,7 @@ class SongTest {
 			// Given
 			Song song = mother.get();
 			// When
-			song.setTitle(Strings.repeat("c", 257));
+			song.setTitle("c".repeat(257));
 			// Then
 			Assertions.assertTrue(song.getTitle().isPresent());
 			Assertions.assertEquals(256, song.getTitle().get().length());
@@ -200,7 +199,7 @@ class SongTest {
 			// Given
 			Song song = mother.get();
 			String artist = "Lynn Gunn";
-			artist += Strings.repeat("c", 256 - artist.length());
+			artist += "c".repeat(256 - artist.length());
 			// When
 			song.setArtist(artist);
 			// Then
@@ -222,7 +221,7 @@ class SongTest {
 		void normalised() {
 			// Given
 			Song song = mother.get();
-			String artist = Strings.repeat(" ", 128) + "Lynn Gunn" + Strings.repeat(" ", 128);
+			String artist = " ".repeat(128) + "Lynn Gunn" + " ".repeat(128);
 			song.setArtist(artist);
 			// Then
 			Assertions.assertTrue(song.getArtist().isPresent());
@@ -244,7 +243,7 @@ class SongTest {
 			// Given
 			Song song = mother.get();
 			// When
-			song.setArtist(Strings.repeat("c", 257));
+			song.setArtist("c".repeat(257));
 			// Then
 			Assertions.assertTrue(song.getArtist().isPresent());
 			Assertions.assertEquals(256, song.getArtist().get().length());
@@ -263,7 +262,7 @@ class SongTest {
 			// Given
 			Song song = mother.get();
 			String url =
-					"https://" + Strings.repeat("c", 2048 - "https://".length() - ".com".length()) + ".com";
+					"https://" + "c".repeat(2048 - "https://".length() - ".com".length()) + ".com";
 			// When
 			song.setThumbnailUrl(url);
 			// Then
@@ -286,7 +285,7 @@ class SongTest {
 		void normalised() {
 			// Given
 			Song song = mother.get();
-			String url = Strings.repeat(" ", 1024) + "https://b.com" + Strings.repeat(" ", 1024);
+			String url = " ".repeat(1024) + "https://b.com" + " ".repeat(1024);
 			// When
 			song.setThumbnailUrl(url);
 			// Then
@@ -311,7 +310,7 @@ class SongTest {
 		void rejectLongUrls() {
 			// Given
 			Song song = mother.get();
-			String suspiciouslyLongUrl = "https://" + Strings.repeat("c", 2048) + ".com";
+			String suspiciouslyLongUrl = "https://" + "c".repeat(2048) + ".com";
 			// Then
 			Assertions.assertThrows(
 					IllegalArgumentException.class,

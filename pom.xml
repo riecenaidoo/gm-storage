@@ -23,21 +23,7 @@
 
   <properties>
     <java.version>17</java.version>
-
-    <spotless.version>2.44.4</spotless.version>
   </properties>
-
-  <dependencies>
-    <!-- Dev Tools-->
-    <dependency>
-      <!-- [Spotless Docs](https://github.com/diffplug/spotless/tree/main/plugin-maven)-->
-      <!-- https://mvnrepository.com/artifact/com.diffplug.spotless/spotless-maven-plugin -->
-      <groupId>com.diffplug.spotless</groupId>
-      <artifactId>spotless-maven-plugin</artifactId>
-      <version>${spotless.version}</version>
-      <!-- Use: Ensuring & enforcing consistent code-style -->
-    </dependency>
-  </dependencies>
 
   <build>
     <plugins>
@@ -60,78 +46,6 @@
         </configuration>
       </plugin>
       <!--      /Configure testing-->
-      <plugin>
-        <!--        Configure code formatting-->
-        <groupId>com.diffplug.spotless</groupId>
-        <artifactId>spotless-maven-plugin</artifactId>
-        <version>${spotless.version}</version>
-        <configuration>
-          <java>
-            <includes>
-              <include>src/main/java/**/*.java</include>
-              <include>src/test/java/**/*.java</include>
-            </includes>
-
-            <!-- Base Code Style-->
-            <googleJavaFormat>
-              <!--<version>1.25</version>  -->
-              <!-- optional. Minimum version for JDK17 compatability.-->
-              <style>GOOGLE</style>
-              <!-- or AOSP (optional) -->
-            </googleJavaFormat>
-            <!-- Order matters. Later overrides previous.-->
-            <indent>
-              <tabs>true</tabs>
-              <spacesPerTab>2</spacesPerTab>
-            </indent>
-
-            <importOrder>
-              <wildcardsLast>
-                <!-- default false. Included for visibility.-->
-                false
-              </wildcardsLast>
-
-            </importOrder>
-            <removeUnusedImports/>
-
-            <formatAnnotations>
-              <!--Format type annotations on same line as type i.e. @Nullable String str-->
-            </formatAnnotations>
-          </java>
-          <pom>
-            <includes>
-              <include>pom.xml</include>
-            </includes>
-
-            <sortPom>
-              <expandEmptyElements>false</expandEmptyElements>
-            </sortPom>
-          </pom>
-          <yaml>
-            <includes>
-              <include>src/**/*.yaml</include>
-            </includes>
-
-            <prettier/>
-          </yaml>
-          <markdown>
-            <includes>
-              <include>**/*.md</include>
-            </includes>
-
-            <flexmark/>
-          </markdown>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <!-- 'check' will flag code style failures. Use as a pre-commit hook. -->
-              <!-- 'apply' will fix them. -->
-            </goals>
-            <!-- We can bind a goal to a <phase/> if needed. Opted not to for now.-->
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
 
