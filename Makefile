@@ -35,9 +35,10 @@ MVN ?= mvn
 # =============================================================================
 # Script Macros
 # =============================================================================
-STOP_PROCESS := ./.scripts/stop-process.sh
-
 XARGS := xargs -0 --no-run-if-empty
+PLAINTEXT_FILTER := $(XARGS) file --mime-type | awk -F: '/text\// { printf "%s\0", $$1 }'
+
+STOP_PROCESS := ./.scripts/stop-process.sh
 
 define stop_process	##> Given the PID file, stop the process
 @if [ -f "$(1)" ]; then \
@@ -48,15 +49,11 @@ endef
 # Project
 # =============================================================================
 MADE := ./.made
-LIB := ./.libs
 
 project: $(MADE) $(MADE)/stop-script	##> alias for initialising the Project
 
 $(MADE):
 	mkdir $(MADE)
-
-$(LIB):
-	mkdir $(LIB)
 
 # See [4.3 Types of Prerequisites](https://www.gnu.org/software/make/manual/html_node/Prerequisite-Types.html) > order-only-prerequisites
 $(MADE)/stop-script: $(STOP_PROCESS) | $(MADE)	##> mark scripts executable
@@ -64,7 +61,7 @@ $(MADE)/stop-script: $(STOP_PROCESS) | $(MADE)	##> mark scripts executable
 	touch $(MADE)/stop-script
 
 rm-project:	##> remove all Project initialisation artifacts
-	rm -rf $(MADE) $(LIB)
+	rm -rf $(MADE)
 
 .PHONY: project rm-project
 # =============================================================================
@@ -118,6 +115,7 @@ rm-docker:	##> remove all Docker artifacts produced by this script
 # =============================================================================
 APP := application/target/application-1.0-SNAPSHOT.jar
 SRC_FILES := $(shell find . -type f \( -name '*.java' -o -name '*.xml' -o -name '*.properties' \))
+LIB := ./.libs
 
 java: $(APP)	##> alias for creating all Java artifacts
 
@@ -132,12 +130,15 @@ GJF := google-java-format-$(GJF_VERSION)-all-deps.jar
 
 java-dev: $(LIB)/$(GJF)	##> alias for creating all Java artifacts for development
 
+$(LIB):
+	mkdir $(LIB)
+
 $(LIB)/$(GJF): $(LIB)	##> download standalone GJF formatter
 	curl -L -O --output-dir $(LIB) https://github.com/google/google-java-format/releases/download/v$(GJF_VERSION)/$(GJF)
 
 rm-java:	##> remove all Java artifacts produced by this script
 	$(MVN) clean
-	rm -rf $(LIB)/$(GJF)
+	rm -rf $(LIB)
 
 serve: $(APP) kill-serve | $(MADE)	##> start the Java server
 	$(JAVA) -jar $(APP) > $(MADE)/serve 2>&1 & echo $$! > $(MADE)/serve.pid
@@ -160,13 +161,12 @@ test-integration:	##> run all integration tests (semantic.IntegrationTest), excl
 test-integration-ext:	##> run all external integration tests (semantic.IntegrationTest#EXTERNAL)
 	$(MVN) verify -Dgroups="external"
 
+JAVA_FILTER := $(XARGS) awk -v RS='\0' '/\.java$$/'
+
 .PHONY: java java-dev rm-java serve kill-serve test test-unit test-smoke test-integration test-integration-ext
 # =============================================================================
 # Formatting
 # =============================================================================
-PLAINTEXT_FILTER := $(XARGS) file --mime-type | awk -F: '/text\// { printf "%s\0", $$1 }'
-JAVA_FILTER := $(XARGS) grep -Z "\.java$$"
-
 FORMAT := $(JAVA_FILTER) | $(XARGS) $(JAVA) -jar $(LIB)/$(GJF) --replace
 FORMAT_CHECK := $(JAVA_FILTER) | $(XARGS) $(JAVA) -jar $(LIB)/$(GJF) --set-exit-if-change
 
