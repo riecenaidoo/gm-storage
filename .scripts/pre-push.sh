@@ -9,6 +9,17 @@ Pre-Push Check(s):
 ===============================================================================
 "
 # =============================================================================
+# Branch Check
+# =============================================================================
+printf "[\033[0;33m%s\033[0m]\t\tChecking... " "Branch"
+if git branch --show-current | grep -q -E "\bmain\b|\bmaster\b|\bproject\b|\bproduction\b|\bdevelop\b|\bfeature\b"; then
+  printf '\033[0;31m%s\033[0m' "Failed!"
+  printf '%s\n' " - $(git branch --show-current) is a protected branch."
+  printf '\n\033[0;31m'
+  exit 1
+fi
+printf '\033[0;32m%s\033[0m\n' "Passed."
+# =============================================================================
 # Staging Check
 # =============================================================================
 printf "[\033[0;33m%s\033[0m]\t\tChecking... " "Staging"

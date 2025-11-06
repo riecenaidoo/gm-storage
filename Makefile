@@ -122,7 +122,7 @@ java: $(APP)	##> alias for creating all Java artifacts
 $(APP): $(SRC_FILES) pom.xml
 	$(MVN) install -DskipTests
 
-build-check:	##> build Java source files; confirm the build is stable
+build-check:	##> check the build is stable; compile source and test files
 	$(MVN) test-compile
 
 GJF_VERSION := 1.32.0
