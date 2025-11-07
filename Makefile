@@ -117,13 +117,13 @@ rm-docker:	##> remove all Docker artifacts produced by this script
 # Java
 # =============================================================================
 APP := application/target/application-1.0-SNAPSHOT.jar
-SRC_FILES := $(shell find . -type f \( -name '*.java' -o -name '*.xml' -o -name '*.properties' \))
+SRC_FILES := $(shell find . -type f \( -name '*.java' -o -name '*.xml' -o -name '*.properties' \) -not -path "*/target/*")
 LIB := ./.libs
 
 java: $(APP)	##> alias for creating all Java artifacts
 
 $(APP): $(SRC_FILES) pom.xml
-	$(MVN) install -DskipTests
+	$(MVN) package -DskipTests
 
 GJF_VERSION := 1.32.0
 GJF := google-java-format-$(GJF_VERSION)-all-deps.jar
