@@ -38,50 +38,68 @@ Stash or stage the changes."
 fi
 printf '\033[0;32m%s\033[0m\n' "Passed."
 # =============================================================================
-# Smoke-Test Check
+# Build Check
 # =============================================================================
-printf "[\033[0;33m%s\033[0m]\t\tChecking... " "Smoke-Test"
-STDOUT=$(make test-smoke)
+printf "[\033[0;33m%s\033[0m]\t\tChecking... " "Building"
+STDOUT=$(make build)
 EXIT_CODE=$?
 if [ "$EXIT_CODE" -ne 0 ]; then
-  printf '\033[0;31m%s\033[0m' "Failed!"
-  printf '%s\n' " - There are Smoke-Test failures; the build is unstable. Resolve and restage."
-  printf '\n\033[0;31m'
-  printf '%s\n' "$STDOUT" | grep "\[ERROR\]"
-  printf '\033[0m\n'
+	printf '\033[0;31m%s\033[0m' "Failed!"
+	printf '%s\n' "	- The build failed. Resolve and restage."
+	printf '\n\033[0;31m'
+	printf '%s\n' "$STDOUT"
+	printf '\033[0m\n'
+
+	printf 'Hint:\t\033[0;36m%s\033[0m\n'"make build"
   exit 1
 fi
 printf '\033[0;32m%s\033[0m\n' "Passed."
 # =============================================================================
-# Unit-Test Check
+# Test Check
 # =============================================================================
-printf "[\033[0;33m%s\033[0m]\t\tChecking... " "Unit-Test"
-STDOUT=$(make test-unit)
-EXIT_CODE=$?
-if [ "$EXIT_CODE" -ne 0 ]; then
+printf "[\033[0;33m%s\033[0m]\t\t\tChecking...\n" "Test"
+# Ordered by execution time, desc.
+make test-smoke > /dev/null 2>&1 &
+SMOKE_PID=$!
+make test-integration > /dev/null 2>&1 &
+INTEGRATION_PID=$!
+make test-unit > /dev/null 2>&1 &
+UNIT_PID=$!
+# -----------------------------------------------------------------------------
+# Test Reporting
+# -----------------------------------------------------------------------------
+wait $UNIT_PID; UNIT_EXIT_CODE=$?
+printf "\t[\033[0;33m%s\033[0m]\t\t" "Unit-Test"
+if [ "$UNIT_EXIT_CODE" -ne 0 ]; then
   printf '\033[0;31m%s\033[0m' "Failed!"
   printf '%s\n' " - There are Unit-Test failures; the build is unstable. Resolve and restage."
-  printf '\n\033[0;31m'
-  printf '%s\n' "$STDOUT" | grep "\[ERROR\]"
-  printf '\033[0m\n'
-  exit 1
+else
+  printf '\033[0;32m%s\033[0m\n' "Passed."
 fi
-printf '\033[0;32m%s\033[0m\n' "Passed."
-# =============================================================================
-# Integration-Test Check
-# =============================================================================
-printf "[\033[0;33m%s\033[0m]\tChecking... " "Integration-Test"
-STDOUT=$(make test-integration)
-EXIT_CODE=$?
-if [ "$EXIT_CODE" -ne 0 ]; then
+# -----------------------------------------------------------------------------
+wait $INTEGRATION_PID; INTEGRATION_EXIT_CODE=$?
+printf "\t[\033[0;33m%s\033[0m]\t" "Integration-Test"
+if [ "$INTEGRATION_EXIT_CODE" -ne 0 ]; then
   printf '\033[0;31m%s\033[0m' "Failed!"
   printf '%s\n' " - There are Integration-Test failures; the build is unstable. Resolve and restage."
-  printf '\n\033[0;31m'
-  printf '%s\n' "$STDOUT" | grep "\[ERROR\]"
-  printf '\033[0m\n'
+else
+  printf '\033[0;32m%s\033[0m\n' "Passed."
+fi
+# -----------------------------------------------------------------------------
+wait $SMOKE_PID; SMOKE_EXIT_CODE=$?
+printf "\t[\033[0;33m%s\033[0m]\t\t" "Smoke-Test"
+if [ "$SMOKE_EXIT_CODE" -ne 0 ]; then
+  printf '\033[0;31m%s\033[0m' "Failed!"
+  printf '%s\n' " - There are Smoke-Test failures; the build is unstable. Resolve and restage."
+else
+  printf '\033[0;32m%s\033[0m\n' "Passed."
+fi
+# -----------------------------------------------------------------------------
+
+if [ "$UNIT_EXIT_CODE" -ne 0 ] || [ "$INTEGRATION_EXIT_CODE" -ne 0 ] || [ "$SMOKE_EXIT_CODE" -ne 0 ]; then
   exit 1
 fi
-printf '\033[0;32m%s\033[0m\n' "Passed."
+
 # =============================================================================
 # ANSI Color Escape Codes
 # =============================================================================
