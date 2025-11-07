@@ -61,7 +61,10 @@ $(MADE)/stop-script: $(STOP_PROCESS) | $(MADE)	##> mark scripts executable
 	touch $(MADE)/stop-script
 
 rm-project:	##> remove all Project initialisation artifacts
-	rm -rf $(MADE)
+	rm -f $(MADE)/stop-script
+	@if [ -d $(MADE) ]; then \
+		rmdir --ignore-fail-on-non-empty $(MADE); \
+	fi
 
 .PHONY: project rm-project
 # =============================================================================
@@ -122,9 +125,6 @@ java: $(APP)	##> alias for creating all Java artifacts
 $(APP): $(SRC_FILES) pom.xml
 	$(MVN) install -DskipTests
 
-build-check:	##> check the build is stable; compile source and test files
-	$(MVN) test-compile
-
 GJF_VERSION := 1.32.0
 GJF := google-java-format-$(GJF_VERSION)-all-deps.jar
 
@@ -136,9 +136,12 @@ $(LIB):
 $(LIB)/$(GJF): $(LIB)	##> download standalone GJF formatter
 	curl -L -O --output-dir $(LIB) https://github.com/google/google-java-format/releases/download/v$(GJF_VERSION)/$(GJF)
 
-rm-java:	##> remove all Java artifacts produced by this script
+rm-java: kill-serve	##> remove all Java artifacts produced by this script
 	$(MVN) clean
-	rm -rf $(LIB)
+	rm -f $(LIB)/$(GJF)
+	@if [ -d $(LIB) ]; then \
+		rmdir --ignore-fail-on-non-empty $(LIB); \
+	fi
 
 serve: $(APP) kill-serve | $(MADE)	##> start the Java server
 	$(JAVA) -jar $(APP) > $(MADE)/serve 2>&1 & echo $$! > $(MADE)/serve.pid
@@ -203,7 +206,7 @@ format-all: java-dev	##> run formatting on all files
 # Utilities
 # =============================================================================
 # See [7.2.6 Standard Targets for Users > 'clean'](https://www.gnu.org/prep/standards/html_node/Standard-Targets.html)
-clean: rm-project rm-git rm-docker rm-java	## alias for cleaning up all artifacts produced by this Project
+clean: rm-java rm-docker rm-git rm-project	## alias for cleaning up all artifacts produced by this Project
 
 help:  ## show a summary of available targets
 	@printf "%s\n" \
