@@ -10,6 +10,7 @@ target/
 *.md
 
 # Tooling
+.libs/
 .mvn/
 mvnw
 mvnw.cmd

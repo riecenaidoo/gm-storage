@@ -1,29 +1,20 @@
-name: gm-song-storage-dev
+name: gm-dev
 services:
+  # [gm-storage]
   db:
-    image: postgres:latest
-    container_name: gm-song-storage-dev-db
+    container_name: "gm-dev-db"
+    image: postgres:14.12-bullseye
+    # [Source](https://www.docker.com/blog/how-to-use-the-postgres-docker-official-image/)
     ports:
-      # [Expose](https://docs.docker.com/compose/compose-file/05-services/#expose)
-      - "5151:5432"
+      - "5432:5432"
     environment:
       # [Environment Variables for Postgres Img](https://hub.docker.com/_/postgres)
-      - POSTGRES_DB=gm_song_storage
+      - POSTGRES_DB=gm
       - POSTGRES_PASSWORD=admin
     volumes:
       # This is where the DDL would go, for now it just is a placeholder.
-      - "./core/src/main/sql/:/docker-entrypoint-initdb.d/"
-  api:
-    image: gm-song-storage-api:dev
-    build:
-      dockerfile: "Dockerfile"
-    container_name: gm-song-storage-dev-api
-    ports:
-      - "8080:8080"
-    environment:
-      # Default User & Password already specified in .properties
-      # [How we resolve hostname 'db'](https://docs.docker.com/compose/networking/)
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/gm_song_storage
-      - SPRING.JPA.OPEN-IN-VIEW=false
-    depends_on:
-      - db
+      - "../gm-storage/core/src/main/sql/:/docker-entrypoint-initdb.d/"
+      # Persist data between sessions.
+      - data:/var/lib/postgresql/data
+volumes:
+  data:

@@ -1,3 +1,5 @@
+# Secondary Dockerfile for use locally during development.
+# If you already have the tooling (java, mvn) use this after `make build`.
 FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app

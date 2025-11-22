@@ -1,4 +1,5 @@
 # 1) Build
+# This stage can be skipped if you have the tooling locally. See `/.scripts/Dockerfile`.
 FROM maven:3.9.6-eclipse-temurin-17 AS builder
 
 WORKDIR /app

@@ -1,5 +1,7 @@
-# [gitattributes](https://git-scm.com/docs/gitattributes)
+# ========================================
+# configs/gitattributes/v1.0.0
+#   - [gitattributes](https://git-scm.com/docs/gitattributes)
+# ========================================
 
 # Ensure consistent LF line endings for all text files
 * text=auto eol=lf
-
