@@ -1,7 +1,16 @@
 #!/bin/sh
 
 # =============================================================================
-# configs/pre-push/v1.2.0
+# configs/pre-push/v1.3.0
+# =============================================================================
+# ANSI Color Escape Codes
+# =============================================================================
+YELLOW="\033[0;33m"
+RED="\033[0;31m"
+GREEN="\033[0;32m"
+CYAN="\033[0;36m"
+BLUE="\033[0;34m"
+NONE="\033[0m"
 # =============================================================================
 
 printf "===============================================================================
@@ -11,53 +20,49 @@ Pre-Push Check(s):
 # =============================================================================
 # Branch Check
 # =============================================================================
-printf "[\033[0;33m%s\033[0m]\t\tChecking... " "Branch"
+printf "[${YELLOW}%s${NONE}]\tChecking... " "Branch"
 if git branch --show-current | grep -q -E "\bmain\b|\bmaster\b|\bproject\b|\bproduction\b|\bdevelop\b|\bfeature\b"; then
-  printf '\033[0;31m%s\033[0m' "Failed!"
-  printf '%s\n' " - $(git branch --show-current) is a protected branch."
-  printf '\n\033[0;31m'
+  printf "${RED}%s${NONE} - %s\n" "Failed!" "$(git branch --show-current) is a protected branch."
   exit 1
 fi
-printf '\033[0;32m%s\033[0m\n' "Passed."
+printf "${GREEN}%s${NONE}\n" "Passed."
 # =============================================================================
 # Staging Check
 # =============================================================================
-printf "[\033[0;33m%s\033[0m]\t\tChecking... " "Staging"
-if ! git diff --quiet; then
-  printf '\033[0;31m%s\033[0m' "Failed!"
-  printf '%s\n' "	- The working directory has unstaged file changes."
-  printf '\n\033[0;31m'
-  git diff --shortstat
-  printf '\033[0m\n'
-  printf '%s\n\n' "This may lead to a false positive during pre-push validation.
-Checks may pass because of changes present in your local repository that will not be included in the push.
+printf "[${YELLOW}%s${NONE}]\tChecking... " "Staging"
+if ! git diff --quiet || [ -n "$(git ls-files --others --exclude-standard)" ]; then
+	printf "${RED}%s${NONE} - %s\n" "Failed!" "The working directory has unstaged changes."
 
-Stash or stage the changes."
-  printf 'Hint:\t\033[0;36m%s\033[0m\n' "git add ." "git stash --keep-index"
-  exit 1
+	printf "\n"
+	git status -s	# Call directly 'printf "\n%s\n" "git status -s"' will not preserve Git output formatting.
+	printf "\n"
+
+	printf "%s\n\n" "This may lead to a false positive during validation.
+Checks may pass due to changes that are only present in your local working directory.
+
+Stage or stash the changes."
+	printf "Hint:\t${CYAN}%s${NONE}\n" "git add ." "git stash -u --keep-index"
+	exit 1
 fi
-printf '\033[0;32m%s\033[0m\n' "Passed."
+printf "${GREEN}%s${NONE}\n" "Passed."
 # =============================================================================
 # Build Check
 # =============================================================================
-printf "[\033[0;33m%s\033[0m]\t\tChecking... " "Building"
-STDOUT=$(make build)
-EXIT_CODE=$?
-if [ "$EXIT_CODE" -ne 0 ]; then
-	printf '\033[0;31m%s\033[0m' "Failed!"
-	printf '%s\n' "	- The build failed. Resolve and restage."
-	printf '\n\033[0;31m'
-	printf '%s\n' "$STDOUT"
-	printf '\033[0m\n'
+printf "[${YELLOW}%s${NONE}]\t\tChecking... " "Build"
+STDOUT=$(make build 2>&1)
+if [ "$?" -ne 0 ]; then
+	printf "${RED}%s${NONE} - %s\n" "Failed!" "The build failed. Resolve and restage."
 
-	printf 'Hint:\t\033[0;36m%s\033[0m\n'"make build"
-  exit 1
+	printf "\n${RED}%s${NONE}\n\n" "$STDOUT"
+
+	printf "Hint:\t${CYAN}%s${NONE}\n" "make build"
+	exit 1
 fi
-printf '\033[0;32m%s\033[0m\n' "Passed."
+printf "${GREEN}%s${NONE}\n" "Passed."
 # =============================================================================
 # Test Check
 # =============================================================================
-printf "[\033[0;33m%s\033[0m]\t\t\tChecking...\n" "Test"
+printf "[${YELLOW}%s${NONE}]\t\tChecking...\n" "Test"
 # Ordered by execution time, desc.
 make test-smoke > /dev/null 2>&1 &
 SMOKE_PID=$!
@@ -68,46 +73,33 @@ UNIT_PID=$!
 # -----------------------------------------------------------------------------
 # Test Reporting
 # -----------------------------------------------------------------------------
+printf " > [${YELLOW}%s${NONE}]\t\t    " "Unit-Test"
 wait $UNIT_PID; UNIT_EXIT_CODE=$?
-printf "\t[\033[0;33m%s\033[0m]\t\t" "Unit-Test"
 if [ "$UNIT_EXIT_CODE" -ne 0 ]; then
-  printf '\033[0;31m%s\033[0m' "Failed!"
-  printf '%s\n' " - There are Unit-Test failures; the build is unstable. Resolve and restage."
+  printf "${RED}%s${NONE} - %s\n" "Failed!" "There are Unit-Test failures; the build is unstable. Resolve and restage."
 else
-  printf '\033[0;32m%s\033[0m\n' "Passed."
+  printf "${GREEN}%s${NONE}\n" "Passed."
 fi
 # -----------------------------------------------------------------------------
+printf " > [${YELLOW}%s${NONE}]\t    " "Integration-Test"
 wait $INTEGRATION_PID; INTEGRATION_EXIT_CODE=$?
-printf "\t[\033[0;33m%s\033[0m]\t" "Integration-Test"
 if [ "$INTEGRATION_EXIT_CODE" -ne 0 ]; then
-  printf '\033[0;31m%s\033[0m' "Failed!"
-  printf '%s\n' " - There are Integration-Test failures; the build is unstable. Resolve and restage."
+  printf "${RED}%s${NONE} - %s\n" "Failed!" "There are Integration-Test failures; the build is unstable. Resolve and restage."
 else
-  printf '\033[0;32m%s\033[0m\n' "Passed."
+  printf "${GREEN}%s${NONE}\n" "Passed."
 fi
 # -----------------------------------------------------------------------------
+printf " > [${YELLOW}%s${NONE}]\t\t    " "Smoke-Test"
 wait $SMOKE_PID; SMOKE_EXIT_CODE=$?
-printf "\t[\033[0;33m%s\033[0m]\t\t" "Smoke-Test"
 if [ "$SMOKE_EXIT_CODE" -ne 0 ]; then
-  printf '\033[0;31m%s\033[0m' "Failed!"
-  printf '%s\n' " - There are Smoke-Test failures; the build is unstable. Resolve and restage."
+  printf "${RED}%s${NONE} - %s\n" "Failed!" "There are Smoke-Test failures; the build is unstable. Resolve and restage."
 else
-  printf '\033[0;32m%s\033[0m\n' "Passed."
+  printf "${GREEN}%s${NONE}\n" "Passed."
 fi
 # -----------------------------------------------------------------------------
 
 if [ "$UNIT_EXIT_CODE" -ne 0 ] || [ "$INTEGRATION_EXIT_CODE" -ne 0 ] || [ "$SMOKE_EXIT_CODE" -ne 0 ]; then
   exit 1
 fi
-
-# =============================================================================
-# ANSI Color Escape Codes
-# =============================================================================
-# YELLOW='\033[0;33m'
-# RED='\033[0;31m'
-# GREEN='\033[0;32m'
-# CYAN='\033[0;36m'
-# BLUE='\033[0;34m'
-# NONE='\033[0m'
 # =============================================================================
 printf '%s\n' "==============================================================================="
