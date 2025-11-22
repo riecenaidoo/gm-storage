@@ -149,6 +149,7 @@ rm-java: kill-serve	##> remove all Java artifacts produced by this script
 	@if [ -d $(LIB) ]; then \
 		rmdir --ignore-fail-on-non-empty $(LIB); \
 	fi
+	rm -f $(MADE)/serve $(MADE)/serve.pid
 
 serve: $(APP) kill-serve | $(MADE)	##> start the Java server
 	$(JAVA) -jar $(APP) > $(MADE)/serve 2>&1 & echo $$! > $(MADE)/serve.pid
