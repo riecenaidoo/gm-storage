@@ -1,3 +1,4 @@
+# In local dev environments we can build from the artifact directly.
 FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app

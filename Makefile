@@ -112,14 +112,23 @@ rm-git:	##> remove all Git artifacts produced by this script
 # =============================================================================
 # Docker
 # =============================================================================
-docker:	##> create all Docker artifacts
+docker:	##> create all Docker infrastructure artifacts
 	$(COMPOSE) create
+
+image: $(MADE)/image-dev	## build the (dev) image
+
+$(MADE)/image-dev: $(APP)
+	docker build -t gm-storage:dev . -f ./.scripts/Dockerfile
+	touch $(MADE)/image-dev
+
+latest: $(MADE)/image-dev	## tag the (dev) image as (latest)
+	docker tag gm-storage:dev gm-storage:latest
 
 rm-docker:	##> remove all Docker artifacts produced by this script
 	$(COMPOSE) down
 	@printf '\nHint:\t$(CYAN)%s$(NONE)\t (Prune volume data)\n' "$(COMPOSE) down --volumes"
 
-.PHONY: docker rm-docker
+.PHONY: docker rm-docker image latest
 # =============================================================================
 # Java
 # =============================================================================
