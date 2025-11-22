@@ -53,7 +53,7 @@ printf "${GREEN}%s${NONE}\n" "Passed."
 # =============================================================================
 # Build Check
 # =============================================================================
-printf "[${YELLOW}%s${NONE}]\tChecking... " "Build"
+printf "[${YELLOW}%s${NONE}]\t\tChecking... " "Build"
 STDOUT=$(make build 2>&1)
 if [ "$?" -ne 0 ]; then
 	printf "${RED}%s${NONE} - %s\n" "Failed!" "The build failed. Resolve and restage."
