@@ -13,7 +13,7 @@ class WebConfig implements WebMvcConfigurer {
 	 *     and define our defaults there. We would want to have a flexible signature here and allow
 	 *     CORS for multiple client urls.
 	 */
-	@Value("${app.client.url:http://localhost:4200}")
+	@Value("${app.client.url}")
 	private String clientUrl;
 
 	@Override
