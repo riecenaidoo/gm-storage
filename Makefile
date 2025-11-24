@@ -1,5 +1,5 @@
 # =============================================================================
-# configs:/makefiles/v1.3.0;/java/v1.1.0
+# configs:/makefiles/v1.3.1;/java/v1.1.0
 # =============================================================================
 # ANSI Color Escape Codes
 # =============================================================================
@@ -49,9 +49,11 @@ PLAINTEXT_FILTER := $(XARGS) file --mime-type | awk -F: '/text\// { printf "%s\0
 
 STOP_PROCESS := ./.scripts/stop-process.sh
 
-define stop_process	##> Given the PID file, stop the process
+
+##> Given the PID file, stop the process
+define stop_process
 @if [ -f "$(1)" ]; then \
-	$(XARGS) --arg-file "$(1)" "$(STOP_PROCESS)"; \
+	xargs --no-run-if-empty --arg-file "$(1)" "$(STOP_PROCESS)"; \
 fi
 endef
 # =============================================================================
