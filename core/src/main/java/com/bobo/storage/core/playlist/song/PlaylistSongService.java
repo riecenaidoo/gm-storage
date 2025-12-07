@@ -30,14 +30,20 @@ public class PlaylistSongService
 		this.songs = songs;
 	}
 
+  /**
+   * @implNote This is not a great implementation. Perhaps it would be better to enforce PlaylistSong
+   * creation via an existing Song and Playlist.
+   */
 	@Override
 	@Transactional
-	public PlaylistSong add(PlaylistSong song) {
-		if (Objects.nonNull(song.getId())) throw new IllegalArgumentException();
-		if (song.getSong().getId() == null) {
-			songs.add(song.getSong());
+	public PlaylistSong add(PlaylistSong playlistSong) {
+		if (Objects.nonNull(playlistSong.getId())) throw new IllegalArgumentException();
+		if (playlistSong.getSong().getId() == null) {
+      Song song = playlistSong.getSong();
+			song = songs.add(song);
+      playlistSong.setSong(song);
 		}
-		return playlistSongs.save(song);
+		return playlistSongs.save(playlistSong);
 	}
 
 	@Override
