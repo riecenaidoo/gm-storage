@@ -61,6 +61,17 @@ public class SongService implements EntityService<Song>, Create<Song>, Read<Song
 	 * @implNote In future, we will mark songs as eligible for a lookup, after a configurable period
 	 *     has past since their last lookup. Those that have never been looked up will be given
 	 *     priority.
+   *
+   * <p>Currently, the expected number of {@code Song} entities requiring lookup at any given time
+   * is small (typically 0-4), and the total table size remains well below 1000 entries. Because of
+   * this, batch processing or paging is not implemented. However, if the dataset grows
+   * significantly, it will be necessary to introduce paging or limit batch size to avoid
+   * performance or memory issues.
+   *
+   * <p>TODO: Refer to the <a
+   * href="https://www.postgresql.org/docs/current/indexes-partial.html">Partial Index</a>
+   * documentation for PostgresSQL to create an index targeting null values for last lookups, or
+   * explore other optimization strategies to improve query performance.
 	 */
 	@Transactional(readOnly = true)
 	public Collection<Song> getLookupCandidates() {
