@@ -1,23 +1,32 @@
 package com.bobo.storage.core.song;
 
+import com.bobo.semantic.TechnicalID;
 import com.bobo.storage.core.semantic.CoreService;
 import com.bobo.storage.core.semantic.Create;
 import com.bobo.storage.core.semantic.DomainEntity;
 import com.bobo.storage.core.semantic.EntityService;
 import com.bobo.storage.core.semantic.Read;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
-import org.springframework.transaction.annotation.Transactional;
 
 @CoreService
 public class SongService implements EntityService<Song>, Create<Song>, Read<Song> {
 
+  private static final Logger log = LoggerFactory.getLogger(SongService.class);
+
 	private final SongRepository songs;
 
-	SongService(SongRepository songs) {
+  private final Collection<SongMigration> migrations;
+
+	SongService(SongRepository songs, Collection<SongMigration> migrations) {
 		this.songs = songs;
-	}
+    this.migrations = migrations;
+  }
 
 	/**
 	 * Songs are uniquely identified by their {@code url}; only one {@link Song} with a given {@code
@@ -37,18 +46,6 @@ public class SongService implements EntityService<Song>, Create<Song>, Read<Song
 	@Transactional(readOnly = true)
 	public Optional<Song> find(int id) {
 		return songs.findById(id);
-	}
-
-	/**
-	 * Find a {@link Song} by its {@code url}, which uniquely identifies it.
-	 *
-	 * @param url the unique reference {@code url} of the {@link Song}.
-	 * @return the {@link Song} if found, otherwise Optional.empty().
-	 * @implSpec {@link Read#find(int)}
-	 */
-	@Transactional(readOnly = true)
-	public Optional<Song> findByUrl(String url) {
-		return songs.findByUrl(url);
 	}
 
 	/**
@@ -78,14 +75,29 @@ public class SongService implements EntityService<Song>, Create<Song>, Read<Song
 		return songs.findAllByLastLookupIsNull();
 	}
 
-	/** TODO define {@code UpdateResource<R>}. */
-	@Transactional
-	public Song updateSong(Song song) {
-		return songs.save(song);
-	}
+  /**
+   * Updates a {@link Song}, deduplicating by {@code url} if necessary.
+   *
+   * @implNote If the {@code url} already exists within the system, we can safely discard any other
+   * partial updates to the {@link Song} and perform a {@link SongMigration} because the data
+   * associated with a {@link Song} can be deterministically derived by the system.
+   *
+   * @see #add(Song)
+   */
+  @Transactional
+  public void updateSong(Song song) {
+    if (song.getId() == null) throw new IllegalArgumentException();
 
-	@Transactional
-	public void delete(Song song) {
-		songs.delete(song);
-	}
+    Optional<Song> existingSong = songs.findByUrl(song.getUrl());
+    if (existingSong.isPresent() && !TechnicalID.same(existingSong.get(), song)) {
+      log.info(
+              "Song#Update: {} URL is already mapped by {}. Performing de-duplication. Its references will be migrated to the existing Song, and it will be removed.",
+              song.log(),
+              existingSong.get().log());
+      migrations.forEach(migration -> migration.migrate(song, existingSong.get()));
+      songs.delete(song);
+    } else {
+      songs.save(song);
+    }
+  }
 }

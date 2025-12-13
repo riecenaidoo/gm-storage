@@ -3,6 +3,8 @@ package com.bobo.storage.core.song;
 import com.bobo.storage.core.semantic.EntityRepository;
 import java.util.Collection;
 import java.util.Optional;
+
+import com.bobo.storage.core.semantic.Read;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,7 +14,14 @@ import org.springframework.stereotype.Repository;
 @Repository
 interface SongRepository extends EntityRepository<Song, Integer>, CrudRepository<Song, Integer> {
 
-	Optional<Song> findByUrl(String url);
+  /**
+   * Find a {@link Song} by its {@code url}, which uniquely identifies it.
+   *
+   * @param url the unique reference {@code url} of the {@link Song}.
+   * @return the {@link Song} if found, otherwise Optional.empty().
+   * @implSpec {@link Read#find(int)}
+   */
+  Optional<Song> findByUrl(String url);
 
 	Collection<Song> findAllByLastLookupIsNull();
 }

@@ -1,19 +1,16 @@
 package com.bobo.storage.core.song;
 
-import com.bobo.semantic.TechnicalID;
-import com.bobo.storage.core.playlist.song.PlaylistSong;
-import com.bobo.storage.core.playlist.song.PlaylistSongService;
 import com.bobo.storage.core.semantic.CoreService;
-
-import java.net.URL;
-import java.util.Arrays;
-import java.util.Optional;
-
+import com.bobo.storage.core.semantic.DomainEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * Performs {@link Song} lookups, coordinating with other services, where necessary.
@@ -39,17 +36,14 @@ public class LookupService {
 
   private final SongService songs;
 
-  private final PlaylistSongService playlistSongs;
-
-  LookupService(WebClient webClient, SongService songs, PlaylistSongService playlistSongs) {
+  LookupService(WebClient webClient, SongService songs) {
     this.webClient = webClient;
     this.songs = songs;
-    this.playlistSongs = playlistSongs;
   }
 
   /**
    * Performs the lookup of a {@link Song}, which is a two-step process that may require
-   * coordination with {@link PlaylistSong}.
+   * coordination with other {@link DomainEntity}.
    *
    * <ol>
    *   <li>Verify the URL of the {@code Song}.
@@ -72,16 +66,15 @@ public class LookupService {
         boolean hit = Provider.lookup(song, webClient);
         if (!hit) {
           applyYouTubeResolutions(song);
-          return;
         }
-        songs.updateSong(song);
       } else if (statusCode.is3xxRedirection()) {
-        resolveRedirection(song);
+        log.debug("Lookup: {} redirects. URL updated. Lookup deferred.", song.log());
       } else if (statusCode.is5xxServerError()) {
         log.info("""
                          Lookup: Host server encountered an exception during routine poll of {}.
                          Will retry later.""", song.log());
       }
+      songs.updateSong(song);
     } catch (Exception ex) {
       log.error(
               "Lookup: Exception encountered on {} with url {}",
@@ -104,21 +97,6 @@ public class LookupService {
                           present in the repository. Was it removed while lookup was occurring?""",
                 song.log());
       }
-    }
-  }
-
-  private void resolveRedirection(Song song) {
-    Optional<Song> existingSong = songs.findByUrl(song.getUrl());
-    if (existingSong.isPresent() && !TechnicalID.same(existingSong.get(), song)) {
-      log.info(
-              "Lookup: {} redirects to {}. Its references will be migrated to the existing Song, and it will be removed.",
-              song.log(),
-              existingSong.get().log());
-      playlistSongs.migrate(song, existingSong.get());
-      songs.delete(song);
-    } else {
-      log.debug("Lookup: {} redirects. URL updated. Lookup deferred.", song.log());
-      songs.updateSong(song);
     }
   }
 
