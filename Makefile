@@ -1,5 +1,5 @@
 # =============================================================================
-# configs:/makefiles/v1.3.1;/java/v1.1.0
+# configs:/makefiles/v1.3.2;/java/v1.1.0
 # =============================================================================
 # ANSI Color Escape Codes
 # =============================================================================
@@ -112,27 +112,6 @@ rm-git:	##> remove all Git artifacts produced by this script
 
 .PHONY: git rm-git
 # =============================================================================
-# Docker
-# =============================================================================
-docker:	##> create all Docker infrastructure artifacts
-	$(COMPOSE) create
-
-image: $(MADE)/image-dev	## build the (dev) image
-
-$(MADE)/image-dev: $(APP)
-	docker build -t gm-storage:dev . -f ./.scripts/Dockerfile
-	touch $(MADE)/image-dev
-
-latest: $(MADE)/image-dev	## tag the (dev) image as (latest)
-	docker tag gm-storage:dev gm-storage:latest
-
-rm-docker:	##> remove all Docker artifacts produced by this script
-	$(COMPOSE) down
-	@printf '\nHint:\t$(CYAN)%s$(NONE)\t (Prune volume data)\n' "$(COMPOSE) down --volumes"
-	rm -f $(MADE)/image-dev
-
-.PHONY: docker image latest rm-docker
-# =============================================================================
 # Java
 # =============================================================================
 APP := application/target/application-1.0-SNAPSHOT.jar
@@ -187,6 +166,27 @@ test-integration-ext:	##> run all external integration tests (semantic.Integrati
 JAVA_FILTER := $(XARGS) awk -v RS='\0' '/\.java$$/'
 
 .PHONY: java java-dev rm-java serve kill-serve test test-unit test-smoke test-integration test-integration-ext
+# =============================================================================
+# Docker
+# =============================================================================
+docker:	##> create all Docker infrastructure artifacts
+	$(COMPOSE) create
+
+image: $(MADE)/image-dev	## build the (dev) image
+
+$(MADE)/image-dev: $(APP)
+	docker build -t gm-storage:dev . -f ./.scripts/Dockerfile
+	touch $(MADE)/image-dev
+
+latest: $(MADE)/image-dev	## tag the (dev) image as (latest)
+	docker tag gm-storage:dev gm-storage:latest
+
+rm-docker:	##> remove all Docker artifacts produced by this script
+	$(COMPOSE) down
+	@printf '\nHint:\t$(CYAN)%s$(NONE)\t (Prune volume data)\n' "$(COMPOSE) down --volumes"
+	rm -f $(MADE)/image-dev
+
+.PHONY: docker image latest rm-docker
 # =============================================================================
 # Formatting
 # =============================================================================
