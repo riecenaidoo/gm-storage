@@ -1,5 +1,5 @@
 # =============================================================================
-# configs:/makefiles/v1.3.2;/java/v1.1.0
+# configs:/makefiles/v1.3.2;/java/v1.1.1
 # =============================================================================
 # ANSI Color Escape Codes
 # =============================================================================
@@ -122,6 +122,7 @@ java: $(APP)	##> alias for creating all Java artifacts
 
 $(APP): $(SRC_FILES) pom.xml
 	$(MVN) package -DskipTests
+	touch $(APP)
 
 GJF_VERSION := 1.32.0
 GJF := google-java-format-$(GJF_VERSION)-all-deps.jar
