@@ -23,6 +23,8 @@ class SongServiceTest {
 
   @Mock private SongRepository repository;
 
+  @Mock private SongLookupRepository lookupRepository;
+
   // Test Utilities
 
   private final Random random = new Random();

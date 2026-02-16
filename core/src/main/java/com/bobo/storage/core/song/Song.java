@@ -9,22 +9,19 @@ import com.bobo.storage.core.semantic.AccessForTesting;
 import com.bobo.storage.core.semantic.DomainEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.web.client.RestClient;
 
 /**
  * The atomic unit of the domain.
@@ -50,15 +47,6 @@ public class Song extends DomainEntity {
    */
   @Column(unique = true, nullable = false, length = 2048)
   private String url;
-
-  /**
-   * The last time this reference was looked up.
-   *
-   * <p>For a new entity, this is expected to be {@code null} since a {@link Song} is uniquely
-   * identified by its reference.
-   */
-  @SuppressWarnings("unused")
-  private LocalDateTime lastLookup;
 
   /**
    * The normalisation pipeline for {@link Song} metadata.
@@ -246,20 +234,16 @@ public class Song extends DomainEntity {
    * Updates the reference (URL) of this song.
    *
    * @param url the new reference URL to assign to this song
-   * @implNote Changing the reference is equivalent to creating a new {@code Song}. As a result,
-   *     this method resets {@code lastLookup} to {@code null} to indicate that the new reference
-   *     requires verification.
-   *     <p>The only valid case for mutating the reference is to follow {@code 3xx Redirection}
-   *     responses from the host of the URL.
+   * @implNote Changing the reference is equivalent to creating a new {@code Song}. The only valid
+   *     case for mutating the reference is to follow {@code 3xx Redirection} responses from the
+   *     host of the URL.
    * @see #url
-   * @see #lastLookup
    */
   @AccessForTesting(Modifier.PACKAGE_PRIVATE)
   void setUrl(String url) {
     url = validatedUrl(url);
     if (url.equals(this.url)) return;
     this.url = url;
-    this.lastLookup = null;
   }
 
   /**
@@ -267,8 +251,7 @@ public class Song extends DomainEntity {
    * href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/HEAD">{@code
    * HEAD}</a> request on this {@link Song}'s {@link #url} to verify its existence.
    *
-   * <p>This operation is considered a lookup and will update {@link #lastLookup}. It is intended to
-   * be invoked as part of regular lookup cycles i.e. polling.
+   * <p>This operation is intended to be invoked as part of regular lookup cycles i.e. polling.
    *
    * <p>It is not required to be called upon creation, based on the assumption that the client
    * supplying this reference has already verified its existence at the time of submission.
@@ -290,61 +273,28 @@ public class Song extends DomainEntity {
    *     redirection chain is unpredictable, further resolution is deferred to subsequent lookup
    *     cycles.
    * @see #url
-   * @see #lastLookup
    */
-  HttpStatusCode poll(WebClient client) {
+  HttpStatusCode poll(RestClient client) throws IOException {
     URI uri = toUri();
-    ClientResponse response =
-        client
-            .head()
-            .uri(uri)
-            .exchangeToMono(Mono::just)
-            .block(Duration.ofSeconds(5)); // TODO allow configuration
-    assert response != null : "exchangeToMono(Mono::just) never null";
-    lookedUp();
-    if (response.statusCode().is3xxRedirection()) {
-      URI redirectionLocation = response.headers().asHttpHeaders().getLocation();
-      if (redirectionLocation != null) {
-        setUrl(redirectionLocation.toString());
-      } else {
-        log.error(
-            """
-            Verification: Encountered {} response. Unsupported.
-            Cannot resolve redirection for {} without a Location header.\
-            """,
-            response.statusCode(),
-            this.log());
+
+    try (ClientHttpResponse response = client.head().uri(uri).exchange((req, res) -> res)) {
+      assert response != null : "exchangeToMono(Mono::just) never null";
+      if (response.getStatusCode().is3xxRedirection()) {
+        URI redirectionLocation = response.getHeaders().getLocation();
+        if (redirectionLocation != null) {
+          setUrl(redirectionLocation.toString());
+        } else {
+          log.error(
+              """
+              Verification: Encountered {} response. Unsupported.
+              Cannot resolve redirection for {} without a Location header.\
+              """,
+              response.getStatusCode(),
+              this.log());
+        }
       }
+      return response.getStatusCode();
     }
-    return response.statusCode();
-  }
-
-  /**
-   * @see #lastLookup
-   */
-  @AccessForTesting(Modifier.PACKAGE_PRIVATE)
-  LocalDateTime getLastLookup() {
-    return lastLookup;
-  }
-
-  /**
-   * @param lastLookup nullable.
-   * @see #lastLookup
-   */
-  @AccessForTesting(Modifier.PACKAGE_PRIVATE)
-  void setLastLookup(LocalDateTime lastLookup) {
-    this.lastLookup = lastLookup;
-  }
-
-  /**
-   * Called when the {@code Song} has been looked up.
-   *
-   * <p>Sets the {@code lastLookup} of the {@code Song} to {@link LocalDate#now()}.
-   *
-   * @see #lastLookup
-   */
-  public void lookedUp() {
-    this.lastLookup = LocalDateTime.now();
   }
 
   /**

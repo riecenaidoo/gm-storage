@@ -2,19 +2,20 @@ package com.bobo.storage.core.song;
 
 import com.bobo.storage.core.semantic.AccessForTesting;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * The source of an embeddable form of content that adheres to the {@code oEmbed} specification.
@@ -30,9 +31,9 @@ import reactor.core.publisher.Mono;
  * @see <a href="https://oembed.com/#section7.1">oEmbed > 7.1 Providers</a>
  */
 enum Provider {
-  YOUTUBE("https://www.youtube.com/oembed"),
-  DEEZER("https://api.deezer.com/oembed"),
-  SPOTIFY("https://open.spotify.com/oembed");
+  YOUTUBE("https://www.youtube.com/oembed", Set.of("youtube.com", "youtu.be")),
+  DEEZER("https://api.deezer.com/oembed", Set.of("deezer.com")),
+  SPOTIFY("https://open.spotify.com/oembed", Set.of("open.spotify.com"));
 
   private static final Logger log = LoggerFactory.getLogger(Provider.class);
 
@@ -40,87 +41,121 @@ enum Provider {
    * An {@code endpoint} exposed by the {@code host} that adheres to the {@code oEmbed}
    * specification.
    */
-  private final URL endpoint;
+  private final URI endpoint;
 
-  Provider(String endpoint) {
-    try {
-      this.endpoint = URI.create(endpoint).toURL();
-    } catch (MalformedURLException e) {
-      throw new RuntimeException("Check the endpoint argument, there is probably a mis-input.", e);
-    }
+  /**
+   * Zero of more known hosts of the {@link Provider}.
+   *
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/URL/host">URL Host | MDN</a>
+   */
+  private final Set<String> hosts;
+
+  Provider(String endpoint, Set<String> hosts) {
+    this.endpoint = URI.create(endpoint);
+    this.hosts = Objects.requireNonNullElse(hosts, Set.of());
   }
 
   @AccessForTesting(AccessForTesting.Modifier.PACKAGE_PRIVATE)
-  URL getEndpoint() {
+  URI getEndpoint() {
     return endpoint;
   }
 
   @AccessForTesting(AccessForTesting.Modifier.PACKAGE_PRIVATE)
-  URL getQuery(URL url) {
-    try {
-      return URI.create(endpoint + "?url=" + url + "&format=json").toURL();
-    } catch (MalformedURLException e) {
-      throw new RuntimeException(
-          "The instantiation of the oEmbed query, given two valid URLs, was not expected to fail.",
-          e);
-    }
+  URI getQuery(Song song) {
+    return UriComponentsBuilder.fromUri(endpoint)
+        .queryParam("url", song.getUrl())
+        .queryParam("format", "json")
+        .build()
+        .toUri();
   }
 
   /**
-   * Looks up metadata for a Song, if data is found the Song will be mutated with the information
-   * found.
-   *
-   * @return true if information about the Song was found.
+   * @return {@code true} if the {@link Song#getUrl()} matches a known URL pattern of the {@link
+   *     Provider}.
    */
-  static boolean lookup(Song song, WebClient webClient) {
-    URL url = song.toUrl();
-    for (Provider provider : values()) {
-      Optional<OEmbedResponse> metadata = provider.queryProvider(url, webClient);
-      song.lookedUp(); // TODO [design] Should this be repeated anytime we lookup the Song, or done
-      // once at the root?
-      if (metadata.isPresent()) {
-        metadata.get().accept(song);
-        log.info("Provider#Lookup: Hit. {} provided by {}.", song.log(), provider.name());
+  public boolean likelyProvides(Song song) {
+    URI uri = song.toUri();
+    String host = uri.getHost();
+
+    if (host == null) return false;
+
+    return hosts.stream().anyMatch(h -> host.equals(h) || host.endsWith("." + h));
+  }
+
+  /**
+   * Returns the {@link Provider Providers} whose URL pattern matches the given {@link Song}.
+   *
+   * <p>If no provider matches, all providers are returned as a fallback and a warning is logged to
+   * highlight a potentially new or unsupported URL pattern.
+   *
+   * @param song the song to evaluate.
+   * @return matching providers, or all providers if none match.
+   */
+  static Provider[] possibleProviders(Song song) {
+    Provider[] providers =
+        Arrays.stream(Provider.values())
+            .filter(provider -> provider.likelyProvides(song))
+            .toArray(Provider[]::new);
+    if (providers.length == 0) {
+      log.warn("Odin: A new pattern has emerged, \"{}\" — who could it belong to?", song.getUrl());
+      return Provider.values();
+    }
+    return providers;
+  }
+
+  /**
+   * Lookup metadata for a {@link Song}, updating the {@link Song} object if any is found.
+   *
+   * @return {@code true} if metadata for the {@link Song} was found, {@code false} otherwise.
+   */
+  static boolean lookup(Song song, RestClient client, Executor executor) {
+    Provider[] providers = possibleProviders(song);
+    //noinspection unchecked
+    CompletableFuture<ResponseEntity<OEmbedResponse>>[] responses =
+        new CompletableFuture[providers.length];
+    for (int i = 0; i < providers.length; i++) {
+      Provider provider = providers[i];
+      URI uri = provider.getQuery(song);
+      responses[i] = CompletableFuture.supplyAsync(() -> provider.query(uri, client), executor);
+    }
+
+    CompletableFuture.allOf(responses).join();
+    for (int i = 0; i < responses.length; i++) {
+      var response = responses[i].join();
+      OEmbedResponse metadata = response.getBody();
+
+      if (response.getStatusCode().is2xxSuccessful() && metadata != null) {
+        log.debug("Odin: {} hails from {}.", song.log(), providers[i].name());
+        metadata.accept(song);
+
         return true;
       }
     }
-    log.debug("Provider#Lookup: No hits for {}.", song.log());
+
+    log.debug("Odin: {} remains obscured to me.", song.log());
     return false;
   }
 
-  private Optional<OEmbedResponse> queryProvider(URL url, WebClient webClient) {
-    URL query = getQuery(url);
-    URI queryURI;
-    try {
-      queryURI = query.toURI();
-    } catch (URISyntaxException e) {
-      // TODO [design] Should probably question whether #getQuery should return a URL or URI then.
-      throw new RuntimeException();
-    }
-
-    return webClient
-        .get()
-        .uri(queryURI)
-        .accept(MediaType.APPLICATION_JSON)
-        .exchangeToMono(Provider::toMono)
-        .blockOptional();
-  }
-
   /**
-   * Extracted for method referencing.
-   *
-   * @param response from an oEmbed API.
-   * @return a {@link Mono} of an {@link OEmbedResponse}, if the API responded with {@code 200 OK}
-   *     otherwise {@link Mono#empty()}.
+   * Extracted from {@link #lookup(Song, RestClient, Executor)} for readability and normalisation.
    */
-  private static Mono<OEmbedResponse> toMono(ClientResponse response) {
-    return (response.statusCode().equals(HttpStatus.OK))
-        ? response.bodyToMono(OEmbedResponse.class)
-        : Mono.empty();
+  private ResponseEntity<OEmbedResponse> query(URI uri, RestClient client) {
+    return client
+        .get()
+        .uri(uri)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange(
+            (request, response) -> {
+              if (response.getStatusCode().is2xxSuccessful()) {
+                return ResponseEntity.ok(response.bodyTo(OEmbedResponse.class));
+              } else {
+                return ResponseEntity.notFound().build();
+              }
+            });
   }
 
   /**
-   * @param type The resource type. For this use case we only care about validating the existence
+   * @param type The resource type. For this use case we only care about validating the existence of
    *     the content, and any metadata about it. We may also forward the provider information for
    *     another consumer to retrieve the embedded content.
    * @param version The oEmbed version number. This must be {@code 1.0}.
@@ -134,10 +169,10 @@ enum Provider {
    * @param thumbnailUrl A URL to a thumbnail image representing the resource. The thumbnail must
    *     respect any {@code maxwidth} and {@code maxheight} parameters. If this parameter is
    *     present, {@code thumbnail_width} and {@code thumbnail_height} must also be present.
-   * @param thumbnailHeight The width of the optional thumbnail. If this parameter is present,
-   *     {@code thumbnail_url} and {@code thumbnail_height} must also be present.
-   * @param thumbnailWidth The height of the optional thumbnail. If this parameter is present,
+   * @param thumbnailHeight The height of the optional thumbnail. If this parameter is present,
    *     {@code thumbnail_url} and {@code thumbnail_width} must also be present.
+   * @param thumbnailWidth The width of the optional thumbnail. If this parameter is present, {@code
+   *     thumbnail_url} and {@code thumbnail_height} must also be present.
    * @see <a href="https://oembed.com/#section2.3">2.3.4. Response Parameters</a>
    */
   private record OEmbedResponse(
@@ -148,10 +183,10 @@ enum Provider {
       @JsonProperty("author_url") Optional<String> authorUrl,
       @JsonProperty("provider_name") Optional<String> providerName,
       @JsonProperty("provider_url") Optional<String> providerUrl,
-      @JsonProperty("cache_age") Optional<String> cacheAge,
+      @JsonProperty("cache_age") Optional<Long> cacheAge,
       @JsonProperty("thumbnail_url") Optional<String> thumbnailUrl,
-      @JsonProperty("thumbnail_height") Optional<String> thumbnailHeight,
-      @JsonProperty("thumbnail_width") Optional<String> thumbnailWidth)
+      @JsonProperty("thumbnail_height") Optional<Integer> thumbnailHeight,
+      @JsonProperty("thumbnail_width") Optional<Integer> thumbnailWidth)
       implements Consumer<Song> {
 
     /**

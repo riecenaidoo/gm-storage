@@ -10,17 +10,19 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
- * Tests that {@code Request(s)} are mapped as I expect by the Jackson {@link ObjectMapper}, when
- * using the (default) autoconfiguration provided by Spring.
+ * Tests that {@code Request(s)} as expected by the Jackson {@link ObjectMapper}, when using the
+ * (default) autoconfiguration provided by Spring.
+ *
+ * @see ImportAutoConfiguration
  */
 @IntegrationTest({ObjectMapper.class, JacksonAutoConfiguration.class})
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {JacksonAutoConfiguration.class})
+@ImportAutoConfiguration(classes = {JacksonAutoConfiguration.class})
 class RequestIT {
 
   private final ObjectMapper mapper;

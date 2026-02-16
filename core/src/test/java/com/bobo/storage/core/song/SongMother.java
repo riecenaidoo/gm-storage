@@ -1,7 +1,6 @@
 package com.bobo.storage.core.song;
 
 import com.bobo.storage.core.semantic.EntityMother;
-import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Random;
@@ -14,8 +13,6 @@ public class SongMother implements EntityMother<Song> {
   private Supplier<Integer> ids;
 
   private Supplier<String> urls;
-
-  private Supplier<LocalDateTime> lastLookups;
 
   private Supplier<String> titles;
 
@@ -54,14 +51,12 @@ public class SongMother implements EntityMother<Song> {
     Integer id = Objects.isNull(ids) ? null : ids.get();
     assert urls != null;
     String url = urls.get();
-    LocalDateTime lastLookup = Objects.isNull(lastLookups) ? null : lastLookups.get();
     String title = Objects.isNull(titles) ? null : titles.get();
     String artist = Objects.isNull(artists) ? null : artists.get();
     String thumbnailUrl = Objects.isNull(thumbnailUrls) ? null : thumbnailUrls.get();
 
     EntityMother.setId(song, id);
     song.setUrl(url);
-    song.setLastLookup(lastLookup);
     song.setTitle(title);
     song.setArtist(artist);
     song.setThumbnailUrl(thumbnailUrl);
@@ -71,12 +66,7 @@ public class SongMother implements EntityMother<Song> {
 
   @Override
   public SongMother withAll() {
-    return this.withIds()
-        .withUrls()
-        .withLastLookups()
-        .withTitles()
-        .withArtists()
-        .withThumbnailUrls();
+    return this.withIds().withUrls().withTitles().withArtists().withThumbnailUrls();
   }
 
   @Override
@@ -109,15 +99,6 @@ public class SongMother implements EntityMother<Song> {
   public SongMother withUrls() {
     return this.withUrls(
         () -> String.format(Locale.ROOT, "https://mock-%d.test", random.nextLong()));
-  }
-
-  public SongMother withLastLookups(Supplier<LocalDateTime> lastLookups) {
-    this.lastLookups = lastLookups;
-    return this;
-  }
-
-  public SongMother withLastLookups() {
-    return withLastLookups(() -> LocalDateTime.now().minusSeconds(Math.abs(random.nextLong())));
   }
 
   public SongMother withTitles(Supplier<String> titles) {

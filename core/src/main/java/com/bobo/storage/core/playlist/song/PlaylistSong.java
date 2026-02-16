@@ -8,8 +8,6 @@ import com.bobo.storage.core.song.Song;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import java.util.Objects;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A {@link Song} within a {@link Playlist}.
@@ -19,8 +17,6 @@ import org.slf4j.LoggerFactory;
  */
 @Entity
 public class PlaylistSong extends DomainEntity {
-
-  private static final Logger log = LoggerFactory.getLogger(PlaylistSong.class);
 
   @ManyToOne(optional = false)
   private Playlist playlist;
@@ -88,7 +84,7 @@ public class PlaylistSong extends DomainEntity {
   }
 
   void migrate(Song to) {
-    log.info("{} migrated from {} to {}.", this.log(), song.log(), to.log());
+    // TODO Validate their URLs are the same.
     setSong(to);
   }
 }
