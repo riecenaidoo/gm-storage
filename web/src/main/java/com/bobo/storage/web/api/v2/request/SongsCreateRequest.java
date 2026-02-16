@@ -5,8 +5,8 @@ import com.bobo.storage.web.semantic.CreateRequest;
 
 public record SongsCreateRequest(String url) implements CreateRequest<Song> {
 
-	@Override
-	public Song toCreate() {
-		return new Song(url);
-	}
+  @Override
+  public Song toCreate() {
+    return new Song(url);
+  }
 }

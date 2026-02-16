@@ -1,6 +1,10 @@
 package com.bobo.storage.web.semantic;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -16,13 +20,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public @interface ResourceController {
 
-	/**
-	 * @return the type of resource the {@code Controller} handles requests for.
-	 */
-	Class<?> resource();
+  /**
+   * @return the type of resource the {@code Controller} handles requests for.
+   */
+  Class<?> resource();
 
-	/**
-	 * @return the representation of the resource the {@code Controller} will serve, when requested.
-	 */
-	Class<?> respondsWith();
+  /**
+   * @return the representation of the resource the {@code Controller} will serve, when requested.
+   */
+  Class<?> respondsWith();
 }

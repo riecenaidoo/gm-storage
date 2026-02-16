@@ -11,16 +11,18 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 interface PlaylistRepository
-		extends EntityRepository<Playlist, Integer>, CrudRepository<Playlist, Integer> {
+    extends EntityRepository<Playlist, Integer>, CrudRepository<Playlist, Integer> {
 
-	@NonNull <S extends Playlist> Collection<S> saveAll(@NonNull Iterable<S> entities);
+  @NonNull
+  <S extends Playlist> Collection<S> saveAll(@NonNull Iterable<S> entities);
 
-	@NonNull Collection<Playlist> findAll();
+  @NonNull
+  Collection<Playlist> findAll();
 
-	/**
-	 * @param nameFragment fragment of a {@link Playlist} {@code name} to search for. Neither {@code
-	 *     null}, nor blank ({@link String#isBlank()}).
-	 * @return {@code Collection} containing zero or more matching {@code Playlists}.
-	 */
-	Collection<Playlist> findAllByNameContainingIgnoringCase(String nameFragment);
+  /**
+   * @param nameFragment fragment of a {@link Playlist} {@code name} to search for. Neither {@code
+   *     null}, nor blank ({@link String#isBlank()}).
+   * @return {@code Collection} containing zero or more matching {@code Playlists}.
+   */
+  Collection<Playlist> findAllByNameContainingIgnoringCase(String nameFragment);
 }

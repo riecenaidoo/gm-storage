@@ -12,9 +12,9 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 interface PlaylistSongRepository
-		extends EntityRepository<PlaylistSong, Integer>, CrudRepository<PlaylistSong, Integer> {
+    extends EntityRepository<PlaylistSong, Integer>, CrudRepository<PlaylistSong, Integer> {
 
-	Collection<PlaylistSong> findAllByPlaylist(Playlist playlist);
+  Collection<PlaylistSong> findAllByPlaylist(Playlist playlist);
 
-	Collection<PlaylistSong> findAllBySong(Song song);
+  Collection<PlaylistSong> findAllBySong(Song song);
 }

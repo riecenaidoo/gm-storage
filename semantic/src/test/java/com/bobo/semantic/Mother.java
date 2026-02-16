@@ -22,29 +22,29 @@ import java.util.stream.Stream;
  */
 public interface Mother<T> extends Supplier<T> {
 
-	/**
-	 * Convenience method to supply {@code n} children with the {@code Mother}'s current
-	 * configuration.
-	 *
-	 * @param n number of children to create.
-	 * @return stream of children.
-	 * @see Stream#toList()
-	 * @see Collectors#toSet()
-	 */
-	default Stream<T> get(int n) {
-		return IntStream.range(1, n + 1).mapToObj((i) -> this.get());
-	}
+  /**
+   * Convenience method to supply {@code n} children with the {@code Mother}'s current
+   * configuration.
+   *
+   * @param n number of children to create.
+   * @return stream of children.
+   * @see Stream#toList()
+   * @see Collectors#toSet()
+   */
+  default Stream<T> get(int n) {
+    return IntStream.range(1, n + 1).mapToObj((i) -> this.get());
+  }
 
-	/**
-	 * Configure the {@code Mother} to create children with <b>all</b> their fields populated with
-	 * mock data.
-	 *
-	 * <p>This is always equivalent to chaining all the {@code Mother}'s {@code with...()} methods.
-	 * This means all <b>previous</b> configurations would be overridden.
-	 *
-	 * <p>A {@code Mother} is primarily a unit-testing utility. Prefer configuring the {@code Mother}
-	 * explicitly using her {@code with...(...)} methods, to be more declarative about what you are
-	 * testing.
-	 */
-	Mother<T> withAll();
+  /**
+   * Configure the {@code Mother} to create children with <b>all</b> their fields populated with
+   * mock data.
+   *
+   * <p>This is always equivalent to chaining all the {@code Mother}'s {@code with...()} methods.
+   * This means all <b>previous</b> configurations would be overridden.
+   *
+   * <p>A {@code Mother} is primarily a unit-testing utility. Prefer configuring the {@code Mother}
+   * explicitly using her {@code with...(...)} methods, to be more declarative about what you are
+   * testing.
+   */
+  Mother<T> withAll();
 }

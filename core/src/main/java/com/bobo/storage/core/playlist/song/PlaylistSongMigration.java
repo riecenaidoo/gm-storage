@@ -3,12 +3,11 @@ package com.bobo.storage.core.playlist.song;
 import com.bobo.storage.core.semantic.DomainEntity;
 import com.bobo.storage.core.song.Song;
 import com.bobo.storage.core.song.SongMigration;
+import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collection;
 
 /**
  * @implNote Extracted from {@link PlaylistSongService} to avoid circular dependencies.
@@ -34,9 +33,9 @@ class PlaylistSongMigration implements SongMigration {
     songsToTransfer.forEach(song -> song.migrate(to));
     playlistSongs.saveAll(songsToTransfer);
     log.info(
-            "PlaylistSong#Migration: {} migrated from {} to {}.",
-            DomainEntity.log(songsToTransfer),
-            from.log(),
-            to.log());
+        "PlaylistSong#Migration: {} migrated from {} to {}.",
+        DomainEntity.log(songsToTransfer),
+        from.log(),
+        to.log());
   }
 }

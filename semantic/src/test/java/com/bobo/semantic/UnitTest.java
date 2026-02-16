@@ -23,24 +23,24 @@ import org.junit.jupiter.api.Tags;
 @Tag(UnitTest.TAG)
 public @interface UnitTest {
 
-	/**
-	 * @return the class whose behaviour is being verified by this {@link UnitTest}.
-	 */
-	Class<?> value() default Object.class;
+  /**
+   * @return the class whose behaviour is being verified by this {@link UnitTest}.
+   */
+  Class<?> value() default Object.class;
 
-	/**
-	 * The {@link Tag} value to use for {@link UnitTest}.
-	 *
-	 * <p>Tagging via JUnit enables running a slice of tests via Maven.
-	 *
-	 * <pre>{@code
-	 * mvn test -Dgroups="unit"
-	 * }</pre>
-	 *
-	 * @see Tags
-	 * @apiNote Annotating a test class with {@link UnitTest} will automatically apply this tag. This
-	 *     {@code TAG} constant is available for special cases where you may want to refer to it
-	 *     directly.
-	 */
-	String TAG = "unit";
+  /**
+   * The {@link Tag} value to use for {@link UnitTest}.
+   *
+   * <p>Tagging via JUnit enables running a slice of tests via Maven.
+   *
+   * <pre>{@code
+   * mvn test -Dgroups="unit"
+   * }</pre>
+   *
+   * @see Tags
+   * @apiNote Annotating a test class with {@link UnitTest} will automatically apply this tag. This
+   *     {@code TAG} constant is available for special cases where you may want to refer to it
+   *     directly.
+   */
+  String TAG = "unit";
 }

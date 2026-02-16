@@ -5,8 +5,8 @@ import com.bobo.storage.web.semantic.CreateRequest;
 
 public record PlaylistsCreateRequest(String title) implements CreateRequest<Playlist> {
 
-	@Override
-	public Playlist toCreate() {
-		return new Playlist(title);
-	}
+  @Override
+  public Playlist toCreate() {
+    return new Playlist(title);
+  }
 }

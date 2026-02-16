@@ -28,19 +28,19 @@ import org.junit.jupiter.api.Tags;
 @Tag(SmokeTest.TAG)
 public @interface SmokeTest {
 
-	/**
-	 * The {@link Tag} value to use for {@link SmokeTest}.
-	 *
-	 * <p>Tagging via JUnit enables running a slice of tests via Maven.
-	 *
-	 * <pre>{@code
-	 * mvn test -Dgroups="smoke"
-	 * }</pre>
-	 *
-	 * @see Tags
-	 * @apiNote Annotating a test class with {@link SmokeTest} will automatically apply this tag. This
-	 *     {@code TAG} constant is available for special cases where you may want to refer to it
-	 *     directly.
-	 */
-	String TAG = "smoke";
+  /**
+   * The {@link Tag} value to use for {@link SmokeTest}.
+   *
+   * <p>Tagging via JUnit enables running a slice of tests via Maven.
+   *
+   * <pre>{@code
+   * mvn test -Dgroups="smoke"
+   * }</pre>
+   *
+   * @see Tags
+   * @apiNote Annotating a test class with {@link SmokeTest} will automatically apply this tag. This
+   *     {@code TAG} constant is available for special cases where you may want to refer to it
+   *     directly.
+   */
+  String TAG = "smoke";
 }

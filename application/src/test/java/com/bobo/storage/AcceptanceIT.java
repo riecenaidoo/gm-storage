@@ -1,5 +1,7 @@
 package com.bobo.storage;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.bobo.semantic.IntegrationTest;
 import com.bobo.storage.core.playlist.Playlist;
 import com.bobo.storage.core.playlist.PlaylistMother;
@@ -9,6 +11,7 @@ import com.bobo.storage.core.song.SongMother;
 import com.bobo.storage.core.song.SongService;
 import com.bobo.storage.web.api.v2.request.SongsCreateRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Random;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,10 +23,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import java.util.Random;
-
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @IntegrationTest
 @ActiveProfiles("test")
@@ -44,7 +43,8 @@ public class AcceptanceIT {
   private final Random random = new Random();
 
   @Autowired
-  public AcceptanceIT(PlaylistService playlists, SongService songs, MockMvc mvc, ObjectMapper mapper) {
+  public AcceptanceIT(
+      PlaylistService playlists, SongService songs, MockMvc mvc, ObjectMapper mapper) {
     this.playlists = playlists;
     this.songs = songs;
     this.mvc = mvc;
@@ -52,12 +52,12 @@ public class AcceptanceIT {
   }
 
   @Nested
-  class ExistingPlaylist{
+  class ExistingPlaylist {
 
     private Playlist playlist;
 
     @BeforeEach
-    void given(){
+    void given() {
       Playlist playlist = new PlaylistMother(random).get();
       this.playlist = playlists.add(playlist);
     }
@@ -72,22 +72,22 @@ public class AcceptanceIT {
 
       // When
       mvc.perform(
-                 MockMvcRequestBuilders.post("/api/v2/playlists/{playlist_id}/songs", playlist.getId())
-                                       .contentType(MediaType.APPLICATION_JSON)
-                                       .content(requestPayload))
-         // Then
-         .andExpect(status().isCreated());
+              MockMvcRequestBuilders.post("/api/v2/playlists/{playlist_id}/songs", playlist.getId())
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(requestPayload))
+          // Then
+          .andExpect(status().isCreated());
     }
 
     /**
      * @implNote This failed due to the constraint that a Song#url must be unique. If we let the ORM
-     * handle adding the Song, it will succeed if it is a unique URL but fail otherwise. Previously
-     * we were correctly adding the Song via the service before adding it into the Playlist, but
-     * during a refactor a while back we regressed.
+     *     handle adding the Song, it will succeed if it is a unique URL but fail otherwise.
+     *     Previously we were correctly adding the Song via the service before adding it into the
+     *     Playlist, but during a refactor a while back we regressed.
      */
     @Test
     @DisplayName("An existing Song can be added to a Playlist")
-    void existingSongIntoPlaylist() throws Exception{
+    void existingSongIntoPlaylist() throws Exception {
       // Given
       Song existingSong = new SongMother(random).get();
       existingSong = songs.add(existingSong);
@@ -98,11 +98,11 @@ public class AcceptanceIT {
 
       // When
       mvc.perform(
-                 MockMvcRequestBuilders.post("/api/v2/playlists/{playlist_id}/songs", playlist.getId())
-                                       .contentType(MediaType.APPLICATION_JSON)
-                                       .content(requestPayload))
-         // Then
-         .andExpect(status().isCreated());
+              MockMvcRequestBuilders.post("/api/v2/playlists/{playlist_id}/songs", playlist.getId())
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(requestPayload))
+          // Then
+          .andExpect(status().isCreated());
     }
   }
 }

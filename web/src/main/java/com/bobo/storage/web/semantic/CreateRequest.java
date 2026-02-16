@@ -7,11 +7,11 @@ package com.bobo.storage.web.semantic;
  */
 public interface CreateRequest<C> {
 
-	/**
-	 * TODO [design] possibly throw 422 Unprocessable Content if the construction of the resource
-	 * fails.
-	 *
-	 * @return a representation of the desired resource this request wishes to create.
-	 */
-	C toCreate();
+  /**
+   * TODO [design] possibly throw 422 Unprocessable Content if the construction of the resource
+   * fails.
+   *
+   * @return a representation of the desired resource this request wishes to create.
+   */
+  C toCreate();
 }

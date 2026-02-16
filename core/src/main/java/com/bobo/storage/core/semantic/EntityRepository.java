@@ -32,11 +32,11 @@ import org.springframework.data.repository.Repository;
 @NoRepositoryBean
 public interface EntityRepository<T extends TechnicalID<ID>, ID> extends Repository<T, ID> {
 
-	/**
-	 * Find a technically identified {@code Entity}.
-	 *
-	 * @param id {@link TechnicalID} of the {@code Entity}.
-	 * @return the {@code Entity}, if it exists, otherwise {@link Optional#empty()}.
-	 */
-	Optional<T> findById(ID id);
+  /**
+   * Find a technically identified {@code Entity}.
+   *
+   * @param id {@link TechnicalID} of the {@code Entity}.
+   * @return the {@code Entity}, if it exists, otherwise {@link Optional#empty()}.
+   */
+  Optional<T> findById(ID id);
 }

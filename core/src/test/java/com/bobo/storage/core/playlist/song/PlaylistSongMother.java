@@ -11,84 +11,84 @@ import java.util.function.Supplier;
 
 public class PlaylistSongMother implements EntityMother<PlaylistSong> {
 
-	private final Random random;
+  private final Random random;
 
-	private Supplier<Integer> ids;
+  private Supplier<Integer> ids;
 
-	private Supplier<Playlist> playlists;
+  private Supplier<Playlist> playlists;
 
-	private Supplier<Song> songs;
+  private Supplier<Song> songs;
 
-	public PlaylistSongMother(Random random) {
-		this.random = random;
-	}
+  public PlaylistSongMother(Random random) {
+    this.random = random;
+  }
 
-	/**
-	 * While the default constructor is always provided, prefer {@link
-	 * PlaylistSongMother#PlaylistSongMother(Random)} where possible.
-	 */
-	@SuppressWarnings("unused")
-	public PlaylistSongMother() {
-		this(new Random());
-	}
+  /**
+   * While the default constructor is always provided, prefer {@link
+   * PlaylistSongMother#PlaylistSongMother(Random)} where possible.
+   */
+  @SuppressWarnings("unused")
+  public PlaylistSongMother() {
+    this(new Random());
+  }
 
-	@Override
-	public PlaylistSong get() {
-		PlaylistSong playlistSong = new PlaylistSong();
+  @Override
+  public PlaylistSong get() {
+    PlaylistSong playlistSong = new PlaylistSong();
 
-		Integer id = Objects.isNull(ids) ? null : ids.get();
-		Playlist playlist =
-				Objects.isNull(playlists)
-						? (playlists = new PlaylistMother(random).withIds()).get()
-						: playlists.get();
-		Song song =
-				Objects.isNull(songs) ? (songs = new SongMother(random).withIds()).get() : songs.get();
+    Integer id = Objects.isNull(ids) ? null : ids.get();
+    Playlist playlist =
+        Objects.isNull(playlists)
+            ? (playlists = new PlaylistMother(random).withIds()).get()
+            : playlists.get();
+    Song song =
+        Objects.isNull(songs) ? (songs = new SongMother(random).withIds()).get() : songs.get();
 
-		EntityMother.setId(playlistSong, id);
-		playlistSong.setPlaylist(playlist);
-		playlistSong.setSong(song);
+    EntityMother.setId(playlistSong, id);
+    playlistSong.setPlaylist(playlist);
+    playlistSong.setSong(song);
 
-		return playlistSong;
-	}
+    return playlistSong;
+  }
 
-	@Override
-	public PlaylistSongMother withAll() {
-		return this.withIds();
-	}
+  @Override
+  public PlaylistSongMother withAll() {
+    return this.withIds();
+  }
 
-	@Override
-	public PlaylistSong setId(PlaylistSong playlistSong) {
-		return EntityMother.setId(playlistSong, random.nextInt());
-	}
+  @Override
+  public PlaylistSong setId(PlaylistSong playlistSong) {
+    return EntityMother.setId(playlistSong, random.nextInt());
+  }
 
-	@Override
-	public PlaylistSongMother withIds(Supplier<Integer> ids) {
-		this.ids = ids;
-		return this;
-	}
+  @Override
+  public PlaylistSongMother withIds(Supplier<Integer> ids) {
+    this.ids = ids;
+    return this;
+  }
 
-	@Override
-	public PlaylistSongMother withIds() {
-		return withIds(this.random::nextInt);
-	}
+  @Override
+  public PlaylistSongMother withIds() {
+    return withIds(this.random::nextInt);
+  }
 
-	public PlaylistSongMother withPlaylists(Supplier<Playlist> playlists) {
-		this.playlists = playlists;
-		return this;
-	}
+  public PlaylistSongMother withPlaylists(Supplier<Playlist> playlists) {
+    this.playlists = playlists;
+    return this;
+  }
 
-	public PlaylistSongMother withPlaylists() {
-		PlaylistMother playlists = new PlaylistMother(random);
-		return withPlaylists(playlists);
-	}
+  public PlaylistSongMother withPlaylists() {
+    PlaylistMother playlists = new PlaylistMother(random);
+    return withPlaylists(playlists);
+  }
 
-	public PlaylistSongMother withSongs(Supplier<Song> songs) {
-		this.songs = songs;
-		return this;
-	}
+  public PlaylistSongMother withSongs(Supplier<Song> songs) {
+    this.songs = songs;
+    return this;
+  }
 
-	public PlaylistSongMother withSongs() {
-		SongMother songs = new SongMother(random);
-		return withSongs(songs);
-	}
+  public PlaylistSongMother withSongs() {
+    SongMother songs = new SongMother(random);
+    return withSongs(songs);
+  }
 }
