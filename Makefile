@@ -1,5 +1,5 @@
 # =============================================================================
-# configs:/makefiles/v1.3.2;/java/v1.1.1
+# configs:/makefiles/v1.4.0;/java/v1.1.2
 # =============================================================================
 # ANSI Color Escape Codes
 # =============================================================================
@@ -45,10 +45,8 @@ MVN ?= mvn
 # Script Macros
 # =============================================================================
 XARGS := xargs -0 --no-run-if-empty
-PLAINTEXT_FILTER := $(XARGS) file --mime-type | awk -F: '/text\// { printf "%s\0", $$1 }'
 
 STOP_PROCESS := ./.scripts/stop-process.sh
-
 
 ##> Given the PID file, stop the process
 define stop_process
@@ -164,8 +162,6 @@ test-integration:	##> run all integration tests (semantic.IntegrationTest), excl
 test-integration-ext:	##> run all external integration tests (semantic.IntegrationTest#EXTERNAL)
 	$(MVN) verify -Dgroups="external"
 
-JAVA_FILTER := $(XARGS) awk -v RS='\0' '/\.java$$/'
-
 .PHONY: java java-dev rm-java serve kill-serve test test-unit test-smoke test-integration test-integration-ext
 # =============================================================================
 # Docker
@@ -191,10 +187,10 @@ rm-docker:	##> remove all Docker artifacts produced by this script
 # =============================================================================
 # Formatting
 # =============================================================================
-FORMAT := $(JAVA_FILTER) | $(XARGS) $(JAVA) -jar $(LIB)/$(GJF) --replace
-FORMAT_CHECK := $(JAVA_FILTER) | $(XARGS) $(JAVA) -jar $(LIB)/$(GJF) --set-exit-if-change
+FORMAT := $(XARGS) $(JAVA) -jar $(LIB)/$(GJF) --replace
+FORMAT_CHECK := $(XARGS) $(JAVA) -jar $(LIB)/$(GJF) --set-exit-if-changed
 
-TRIM_CHECK := $(PLAINTEXT_FILTER) | $(XARGS) grep -lZ '[[:blank:]]$$'
+TRIM_CHECK := $(XARGS) grep -IlZ '[[:blank:]]$$'
 TRIM := $(TRIM_CHECK) | $(XARGS) sed -i 's/[ \t]*$$//'
 
 format: format-diff format-untracked	## alias to run formatting (format-diff) (format-untracked) rules
@@ -202,7 +198,7 @@ format: format-diff format-untracked	## alias to run formatting (format-diff) (f
 
 format-diff: java-dev	##> run formatting on modified (git diff HEAD) files
 	$(DIFF_FILES) | $(TRIM)
-	$(DIFF_FILES) | $(FORMAT)
+	$(DIFF_FILES) -- '*.java' | $(FORMAT)
 
 format-diff-check: java-dev	##> check formatting on modified (git diff HEAD) files
 	@TRAILING_WHITESPACE_FILES=$$($(DIFF_FILES) | $(TRIM_CHECK)); \
@@ -211,15 +207,14 @@ format-diff-check: java-dev	##> check formatting on modified (git diff HEAD) fil
 		  printf '\t- %s\n' "$$TRAILING_WHITESPACE_FILES"; \
 		exit 1; \
 	fi
-	$(DIFF_FILES) | $(FORMAT_CHECK)
+	$(DIFF_FILES) -- '*.java' | $(FORMAT_CHECK)
 
 format-untracked: java-dev	##> run formatting on untracked files
 	$(UNTRACKED_FILES) | $(TRIM)
-	$(UNTRACKED_FILES) | $(FORMAT)
+	$(UNTRACKED_FILES) -- '*.java' | $(FORMAT)
 
 format-all: java-dev	##> run formatting on all files
-	find . -maxdepth 1 -type f -print0 | $(TRIM)
-	find .scripts/ application/ core/ web/ semantic/ -type f -print0 | $(TRIM)
+	find . .scripts/ application/ core/ web/ semantic/ -type f -print0 | $(TRIM)
 	find . -type f -name '*.java' -print0 | $(FORMAT)
 
 .PHONY: format format-diff format-untracked format-all
