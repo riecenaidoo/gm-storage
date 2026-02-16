@@ -2,15 +2,14 @@ package com.bobo.storage.core.song;
 
 import com.bobo.storage.core.semantic.CoreService;
 import com.bobo.storage.core.semantic.DomainEntity;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import java.net.URL;
-import java.util.Arrays;
-import java.util.Optional;
 
 /**
  * Performs {@link Song} lookups, coordinating with other services, where necessary.
@@ -52,9 +51,9 @@ public class LookupService {
    *
    * @param song to lookup.
    * @implNote This is the atomic operation. If it fails the batch should not fail, but this
-   * individual should be retried.
-   * <p>In the event of a redirection, we defer lookup for the next pass. It is very possible to
-   * be redirected multiple times. We should only poll Providers on a stable URL.
+   *     individual should be retried.
+   *     <p>In the event of a redirection, we defer lookup for the next pass. It is very possible to
+   *     be redirected multiple times. We should only poll Providers on a stable URL.
    * @see Song#poll(WebClient)
    * @see Provider#lookup(Song, WebClient)
    */
@@ -70,17 +69,16 @@ public class LookupService {
       } else if (statusCode.is3xxRedirection()) {
         log.debug("Lookup: {} redirects. URL updated. Lookup deferred.", song.log());
       } else if (statusCode.is5xxServerError()) {
-        log.info("""
-                         Lookup: Host server encountered an exception during routine poll of {}.
-                         Will retry later.""", song.log());
+        log.info(
+            """
+            Lookup: Host server encountered an exception during routine poll of {}.
+            Will retry later.\
+            """,
+            song.log());
       }
       songs.updateSong(song);
     } catch (Exception ex) {
-      log.error(
-              "Lookup: Exception encountered on {} with url {}",
-              song.log(),
-              song.getUrl(),
-              ex);
+      log.error("Lookup: Exception encountered on {} with url {}", song.log(), song.getUrl(), ex);
 
       Optional<Song> originalSong = songs.find(song.getId());
       if (originalSong.isPresent()) {
@@ -88,14 +86,14 @@ public class LookupService {
         song.lookedUp();
         songs.updateSong(song);
         log.info(
-                "Lookup: Gracefully handled exception on {}. Removed from lookup queue.",
-                song.log());
+            "Lookup: Gracefully handled exception on {}. Removed from lookup queue.", song.log());
       } else {
         log.warn(
-                """
-                        Lookup: Exception handling failed because {} is no longer
-                          present in the repository. Was it removed while lookup was occurring?""",
-                song.log());
+            """
+            Lookup: Exception handling failed because {} is no longer
+              present in the repository. Was it removed while lookup was occurring?\
+            """,
+            song.log());
       }
     }
   }
@@ -104,8 +102,8 @@ public class LookupService {
    * Attempt to resolve potential issues with YouTube URLs.
    *
    * @implNote YouTube share links add additional share identifier query parameters and URLs of
-   * videos inside a mix or playlist will contain query parameters to link to the list. Their oEmbed
-   * endpoint does not resolve these URLs as belonging to YouTube.
+   *     videos inside a mix or playlist will contain query parameters to link to the list. Their
+   *     oEmbed endpoint does not resolve these URLs as belonging to YouTube.
    */
   private void applyYouTubeResolutions(Song song) {
     if (!song.getUrl().matches(".*(youtube\\.com|youtu\\.be).*")) {
@@ -118,21 +116,24 @@ public class LookupService {
       return;
     }
 
-    Optional<String> videoId = Arrays.stream(query.split("&"))
-                                     .map(param -> param.split("="))
-                                     .filter(keyValue -> keyValue.length == 2 && keyValue[0].equals(
-                                             "v"))
-                                     .map(keyValue -> keyValue[1])
-                                     .findFirst();
+    Optional<String> videoId =
+        Arrays.stream(query.split("&"))
+            .map(param -> param.split("="))
+            .filter(keyValue -> keyValue.length == 2 && keyValue[0].equals("v"))
+            .map(keyValue -> keyValue[1])
+            .findFirst();
 
     if (videoId.isEmpty()) {
       return;
     }
 
-    log.debug("""
-                      Lookup: {} is likely provided by YouTube,
-                      but there is an issue resolving metadata for the URL via YouTube.
-                      Normalising the URL through video id extraction.""", song.log());
+    log.debug(
+        """
+        Lookup: {} is likely provided by YouTube,
+        but there is an issue resolving metadata for the URL via YouTube.
+        Normalising the URL through video id extraction.\
+        """,
+        song.log());
     song.setUrl("https://www.youtube.com/watch?v=" + videoId.get());
   }
 }

@@ -7,8 +7,8 @@ import com.bobo.storage.core.semantic.DomainEntity;
  * deduplication.
  *
  * @apiNote Every {@link DomainEntity} associated with a {@link Song} should provide a strategy for
- * handling {@link Song} migrations, or be configured to cascade delete itself with its associated
- * {@link Song}.
+ *     handling {@link Song} migrations, or be configured to cascade delete itself with its
+ *     associated {@link Song}.
  */
 public interface SongMigration {
 
@@ -19,5 +19,4 @@ public interface SongMigration {
    * @param to {@link Song} to transfer to.
    */
   void migrate(Song from, Song to);
-
 }

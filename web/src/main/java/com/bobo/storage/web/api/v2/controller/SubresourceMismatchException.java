@@ -11,34 +11,34 @@ import com.bobo.semantic.TechnicalID;
  */
 public class SubresourceMismatchException extends RuntimeException {
 
-	private final String resourceName;
+  private final String resourceName;
 
-	private final String identifier;
+  private final String identifier;
 
-	private final String subResourceName;
+  private final String subResourceName;
 
-	private final String subResourceIdentifier;
+  private final String subResourceIdentifier;
 
-	public SubresourceMismatchException(TechnicalID<?> resource, TechnicalID<?> subResource) {
-		this.resourceName = resource.getClass().getSimpleName();
-		this.identifier = resource.getId().toString();
-		this.subResourceName = subResource.getClass().getSimpleName();
-		this.subResourceIdentifier = subResource.getId().toString();
-	}
+  public SubresourceMismatchException(TechnicalID<?> resource, TechnicalID<?> subResource) {
+    this.resourceName = resource.getClass().getSimpleName();
+    this.identifier = resource.getId().toString();
+    this.subResourceName = subResource.getClass().getSimpleName();
+    this.subResourceIdentifier = subResource.getId().toString();
+  }
 
-	public String getResourceName() {
-		return resourceName;
-	}
+  public String getResourceName() {
+    return resourceName;
+  }
 
-	public String getIdentifier() {
-		return identifier;
-	}
+  public String getIdentifier() {
+    return identifier;
+  }
 
-	public String getSubResourceName() {
-		return subResourceName;
-	}
+  public String getSubResourceName() {
+    return subResourceName;
+  }
 
-	public String getSubResourceIdentifier() {
-		return subResourceIdentifier;
-	}
+  public String getSubResourceIdentifier() {
+    return subResourceIdentifier;
+  }
 }

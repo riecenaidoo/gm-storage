@@ -5,10 +5,10 @@ package com.bobo.storage.web.semantic;
  *     Patch > Operations</a>.
  */
 public enum PatchOperation {
-	ADD,
-	REMOVE,
-	REPLACE,
-	MOVE,
-	COPY,
-	TEST
+  ADD,
+  REMOVE,
+  REPLACE,
+  MOVE,
+  COPY,
+  TEST
 }

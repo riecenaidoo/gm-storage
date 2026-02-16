@@ -13,18 +13,18 @@ import java.util.Optional;
  */
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 public record PlaylistSongResponse(
-		Integer id,
-		String url,
-		Optional<String> title,
-		Optional<String> artist,
-		@JsonProperty("thumbnail_url") Optional<String> thumbnailUrl) {
+    Integer id,
+    String url,
+    Optional<String> title,
+    Optional<String> artist,
+    @JsonProperty("thumbnail_url") Optional<String> thumbnailUrl) {
 
-	public PlaylistSongResponse(PlaylistSong playlistSong) {
-		this(
-				playlistSong.getId(),
-				playlistSong.getSong().getUrl(),
-				playlistSong.getSong().getTitle(),
-				playlistSong.getSong().getArtist(),
-				playlistSong.getSong().getThumbnailUrl());
-	}
+  public PlaylistSongResponse(PlaylistSong playlistSong) {
+    this(
+        playlistSong.getId(),
+        playlistSong.getSong().getUrl(),
+        playlistSong.getSong().getTitle(),
+        playlistSong.getSong().getArtist(),
+        playlistSong.getSong().getThumbnailUrl());
+  }
 }

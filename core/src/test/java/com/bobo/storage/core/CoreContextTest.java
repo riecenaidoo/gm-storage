@@ -13,10 +13,10 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest
 class CoreContextTest {
 
-	private static final Logger log = LoggerFactory.getLogger(CoreContextTest.class);
+  private static final Logger log = LoggerFactory.getLogger(CoreContextTest.class);
 
-	@Test
-	void contextLoads() {
-		log.info("Core module context loads successfully.");
-	}
+  @Test
+  void contextLoads() {
+    log.info("Core module context loads successfully.");
+  }
 }

@@ -20,30 +20,30 @@ import org.springframework.data.repository.CrudRepository;
 @DataJpaTest
 class SongRepositoryIT {
 
-	// Test Utilities
+  // Test Utilities
 
-	private final Random random = new Random();
+  private final Random random = new Random();
 
-	// Test Targets
+  // Test Targets
 
-	private final SongRepository repository;
+  private final SongRepository repository;
 
-	@Autowired
-	SongRepositoryIT(SongRepository repository) {
-		this.repository = repository;
-	}
+  @Autowired
+  SongRepositoryIT(SongRepository repository) {
+    this.repository = repository;
+  }
 
-	@Test
-	void findByUrl() {
-		// Given
-		Song song = new SongMother(random).withUrls().get();
-		song = repository.save(song);
-		Assertions.assertTrue(repository.findById(song.getId()).isPresent(), "Test assumption failed.");
+  @Test
+  void findByUrl() {
+    // Given
+    Song song = new SongMother(random).withUrls().get();
+    song = repository.save(song);
+    Assertions.assertTrue(repository.findById(song.getId()).isPresent(), "Test assumption failed.");
 
-		// When
-		Song retrievedSong = repository.findByUrl(song.getUrl()).orElseThrow(AssertionError::new);
+    // When
+    Song retrievedSong = repository.findByUrl(song.getUrl()).orElseThrow(AssertionError::new);
 
-		// Then
-		Assertions.assertEquals(song, retrievedSong);
-	}
+    // Then
+    Assertions.assertEquals(song, retrievedSong);
+  }
 }

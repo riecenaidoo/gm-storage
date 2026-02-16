@@ -1,10 +1,9 @@
 package com.bobo.storage.core.song;
 
 import com.bobo.storage.core.semantic.EntityRepository;
+import com.bobo.storage.core.semantic.Read;
 import java.util.Collection;
 import java.util.Optional;
-
-import com.bobo.storage.core.semantic.Read;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -23,5 +22,5 @@ interface SongRepository extends EntityRepository<Song, Integer>, CrudRepository
    */
   Optional<Song> findByUrl(String url);
 
-	Collection<Song> findAllByLastLookupIsNull();
+  Collection<Song> findAllByLastLookupIsNull();
 }

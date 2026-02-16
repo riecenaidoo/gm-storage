@@ -19,46 +19,46 @@ import org.springframework.data.repository.CrudRepository;
 @DataJpaTest
 class PlaylistSongRepositoryIT {
 
-	// Test Utilities
+  // Test Utilities
 
-	private final Random random = new Random();
+  private final Random random = new Random();
 
-	private final PlaylistTestRepository playlistRepository;
+  private final PlaylistTestRepository playlistRepository;
 
-	private final SongTestRepository songRepository;
+  private final SongTestRepository songRepository;
 
-	// Test Targets
+  // Test Targets
 
-	private final PlaylistSongRepository repository;
+  private final PlaylistSongRepository repository;
 
-	@Autowired
-	PlaylistSongRepositoryIT(
-			PlaylistSongRepository repository,
-			PlaylistTestRepository playlistRepository,
-			SongTestRepository songRepository) {
-		this.repository = repository;
-		this.playlistRepository = playlistRepository;
-		this.songRepository = songRepository;
-	}
+  @Autowired
+  PlaylistSongRepositoryIT(
+      PlaylistSongRepository repository,
+      PlaylistTestRepository playlistRepository,
+      SongTestRepository songRepository) {
+    this.repository = repository;
+    this.playlistRepository = playlistRepository;
+    this.songRepository = songRepository;
+  }
 
-	/**
-	 * @see PlaylistSongRepository#findAllByPlaylist(Playlist)
-	 */
-	@Test
-	void findAllByPlaylist() {
-		// Given
-		Playlist playlist = playlistRepository.save(new PlaylistMother(random).get());
-		Song song = songRepository.save(new SongMother(random).get());
+  /**
+   * @see PlaylistSongRepository#findAllByPlaylist(Playlist)
+   */
+  @Test
+  void findAllByPlaylist() {
+    // Given
+    Playlist playlist = playlistRepository.save(new PlaylistMother(random).get());
+    Song song = songRepository.save(new SongMother(random).get());
 
-		repository.save(new PlaylistSong(playlist, song));
+    repository.save(new PlaylistSong(playlist, song));
 
-		// When
-		Collection<PlaylistSong> playlistSongs = repository.findAllByPlaylist(playlist);
+    // When
+    Collection<PlaylistSong> playlistSongs = repository.findAllByPlaylist(playlist);
 
-		// Then
-		Assertions.assertEquals(1, playlistSongs.size());
-		for (PlaylistSong playlistSong : playlistSongs) {
-			Assertions.assertSame(playlist, playlistSong.getPlaylist());
-		}
-	}
+    // Then
+    Assertions.assertEquals(1, playlistSongs.size());
+    for (PlaylistSong playlistSong : playlistSongs) {
+      Assertions.assertSame(playlist, playlistSong.getPlaylist());
+    }
+  }
 }

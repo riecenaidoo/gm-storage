@@ -17,69 +17,69 @@ import org.junit.jupiter.api.Test;
 @UnitTest(DomainEntity.class)
 class DomainEntityTest {
 
-	/**
-	 * To be used for creating arbitrary values that will <b>never</b> change during the scope of the
-	 * test they were created within.
-	 *
-	 * <p>Mark such values {@code final} where possible to declare the intention.
-	 */
-	private final Random random = new Random();
+  /**
+   * To be used for creating arbitrary values that will <b>never</b> change during the scope of the
+   * test they were created within.
+   *
+   * <p>Mark such values {@code final} where possible to declare the intention.
+   */
+  private final Random random = new Random();
 
-	@Test
-	@DisplayName("Produces a log in the format Entity(id:...)")
-	void log() {
-		// Given
-		DomainEntity entity = new SongMother(random).withIds(() -> 1).get();
-		// When
-		String log = entity.log();
-		// Then
-		Assertions.assertEquals("Song(id:1)", log);
-	}
+  @Test
+  @DisplayName("Produces a log in the format Entity(id:...)")
+  void log() {
+    // Given
+    DomainEntity entity = new SongMother(random).withIds(() -> 1).get();
+    // When
+    String log = entity.log();
+    // Then
+    Assertions.assertEquals("Song(id:1)", log);
+  }
 
-	/**
-	 * @see DomainEntity#log(Collection)
-	 */
-	@Nested
-	class LogCollection {
+  /**
+   * @see DomainEntity#log(Collection)
+   */
+  @Nested
+  class LogCollection {
 
-		@Test
-		@DisplayName("Produces a log in the format n Entity(ids:...,...)")
-		void log() {
-			// Given
-			List<Song> entities = new SongMother(random).get(3).toList();
-			EntityMother.setId(entities.get(0), 1);
-			EntityMother.setId(entities.get(1), 2);
-			EntityMother.setId(entities.get(2), 3);
-			// When
-			String log = DomainEntity.log(entities);
-			// Then
-			Assertions.assertEquals("3 Song(ids:1, 2, 3)", log);
-		}
+    @Test
+    @DisplayName("Produces a log in the format n Entity(ids:...,...)")
+    void log() {
+      // Given
+      List<Song> entities = new SongMother(random).get(3).toList();
+      EntityMother.setId(entities.get(0), 1);
+      EntityMother.setId(entities.get(1), 2);
+      EntityMother.setId(entities.get(2), 3);
+      // When
+      String log = DomainEntity.log(entities);
+      // Then
+      Assertions.assertEquals("3 Song(ids:1, 2, 3)", log);
+    }
 
-		@Test
-		@DisplayName("Throws IllegalArgumentException if the collection is empty.")
-		void empty() {
-			// Given
-			Collection<DomainEntity> entities = Collections.emptyList();
-			// When
-			Assertions.assertThrows(
-					IllegalArgumentException.class,
-					// Then
-					() -> DomainEntity.log(entities));
-		}
+    @Test
+    @DisplayName("Throws IllegalArgumentException if the collection is empty.")
+    void empty() {
+      // Given
+      Collection<DomainEntity> entities = Collections.emptyList();
+      // When
+      Assertions.assertThrows(
+          IllegalArgumentException.class,
+          // Then
+          () -> DomainEntity.log(entities));
+    }
 
-		@Test
-		@DisplayName("Throws IllegalArgumentException if the collection is non-homogenous.")
-		void nonHomogeneous() {
-			// Given
-			Playlist playlist = new PlaylistMother(random).withIds().get();
-			Song song = new SongMother(random).withIds().get();
-			Collection<DomainEntity> entities = List.of(playlist, song);
-			// When
-			Assertions.assertThrows(
-					IllegalArgumentException.class,
-					// Then
-					() -> DomainEntity.log(entities));
-		}
-	}
+    @Test
+    @DisplayName("Throws IllegalArgumentException if the collection is non-homogenous.")
+    void nonHomogeneous() {
+      // Given
+      Playlist playlist = new PlaylistMother(random).withIds().get();
+      Song song = new SongMother(random).withIds().get();
+      Collection<DomainEntity> entities = List.of(playlist, song);
+      // When
+      Assertions.assertThrows(
+          IllegalArgumentException.class,
+          // Then
+          () -> DomainEntity.log(entities));
+    }
+  }
 }

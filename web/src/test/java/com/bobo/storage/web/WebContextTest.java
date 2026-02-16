@@ -15,11 +15,11 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest
 class WebContextTest {
 
-	private static final Logger log =
-			LoggerFactory.getLogger(com.bobo.storage.web.WebContextTest.class);
+  private static final Logger log =
+      LoggerFactory.getLogger(com.bobo.storage.web.WebContextTest.class);
 
-	@Test
-	void contextLoads() {
-		log.info("Web module context loads successfully.");
-	}
+  @Test
+  void contextLoads() {
+    log.info("Web module context loads successfully.");
+  }
 }

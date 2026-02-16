@@ -6,10 +6,10 @@ import java.util.Optional;
 
 public record PlaylistsPatchRequest(Optional<String> title) implements PatchRequest<Playlist> {
 
-	@Override
-	public Playlist patch(Playlist playlist) {
-		title.ifPresent(playlist::setName);
+  @Override
+  public Playlist patch(Playlist playlist) {
+    title.ifPresent(playlist::setName);
 
-		return playlist;
-	}
+    return playlist;
+  }
 }

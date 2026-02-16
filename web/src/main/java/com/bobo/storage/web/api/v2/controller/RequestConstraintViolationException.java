@@ -6,7 +6,7 @@ package com.bobo.storage.web.api.v2.controller;
  */
 public class RequestConstraintViolationException extends RuntimeException {
 
-	public RequestConstraintViolationException(String message) {
-		super(message);
-	}
+  public RequestConstraintViolationException(String message) {
+    super(message);
+  }
 }
