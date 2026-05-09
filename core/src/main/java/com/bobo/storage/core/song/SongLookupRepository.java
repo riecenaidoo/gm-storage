@@ -1,7 +1,7 @@
 package com.bobo.storage.core.song;
 
 import com.bobo.storage.core.semantic.EntityRepository;
-import com.bobo.storage.core.song.SongLookup.Status;
+import com.bobo.storage.core.song.SongLookup.JobStatus;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
@@ -47,5 +47,5 @@ FOR UPDATE SKIP LOCKED
       nativeQuery = true)
   List<SongLookup> findNext(@Param("threshold") Instant threshold, @Param("limit") int limit);
 
-  Collection<SongLookup> findAllByStatusAndLastModifiedBefore(Status status, Instant instant);
+  Collection<SongLookup> findAllByStatusAndLastModifiedBefore(JobStatus status, Instant instant);
 }

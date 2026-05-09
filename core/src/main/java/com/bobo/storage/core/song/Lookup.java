@@ -2,7 +2,7 @@ package com.bobo.storage.core.song;
 
 import com.bobo.storage.core.semantic.CoreService;
 import com.bobo.storage.core.semantic.DomainEntity;
-import com.bobo.storage.core.song.SongLookup.Status;
+import com.bobo.storage.core.song.SongLookup.JobStatus;
 import java.net.URL;
 import java.time.Instant;
 import java.util.Arrays;
@@ -66,7 +66,7 @@ public class Lookup {
    * Retrieve the next eligible {@link Song}(s) from the lookup queue, if any.
    *
    * <p>This action claims (removes) them from the queue and marks them as {@link
-   * Status#PROCESSING}. They should be submitted to {@link #lookup(SongLookup)}.
+   * JobStatus#PROCESSING}. They should be submitted to {@link #lookup(SongLookup)}.
    *
    * @implNote We cannot not use the {@link Transactional} annotation on this method as it is {@code
    *     private}, and said annotation works through proxying. A method call from inside the object
@@ -126,7 +126,7 @@ public class Lookup {
         log.debug(
             "{} redirects. URL updated. Lookup of redirection location deferred for later.",
             song.log());
-        lookup.finish(Status.PENDING);
+        lookup.finish(JobStatus.PENDING);
       } else if (statusCode.is4xxClientError()) {
         log.warn(
             """
@@ -134,7 +134,7 @@ public class Lookup {
             The system cannot recover from this. Removed from Lookup Queue.\
             """,
             song.log());
-        lookup.finish(Status.INVALID);
+        lookup.finish(JobStatus.INVALID);
       } else if (statusCode.is5xxServerError()) {
         log.info(
             """
@@ -174,7 +174,7 @@ public class Lookup {
     Song song = lookup.getSong();
     boolean hit = Provider.lookup(song, client, executor);
     if (hit) {
-      lookup.finish(Status.DONE);
+      lookup.finish(JobStatus.DONE);
     } else {
       applyYouTubeResolutions(song);
       lookup.failed();
@@ -229,13 +229,14 @@ public class Lookup {
    * Attempt to recover hanging {@link Lookup} jobs.
    *
    * @apiNote While the job itself can recover from failure, if the worker running the job or the
-   *     system fail the job will be left in {@link Status#PROCESSING}
+   *     system fail the job will be left in {@link JobStatus#PROCESSING}
    */
   @Transactional
   public void recover() {
     Instant jobTimeoutThreshold = Instant.now().minus(config.jobTimeoutThreshold());
     Collection<SongLookup> timedOutLookups =
-        this.lookups.findAllByStatusAndLastModifiedBefore(Status.PROCESSING, jobTimeoutThreshold);
+        this.lookups.findAllByStatusAndLastModifiedBefore(
+            JobStatus.PROCESSING, jobTimeoutThreshold);
 
     if (timedOutLookups.isEmpty()) {
       log.trace("Charon: All is as it should be.");

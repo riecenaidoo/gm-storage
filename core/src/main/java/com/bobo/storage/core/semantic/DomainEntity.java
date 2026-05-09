@@ -7,6 +7,7 @@ import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import java.util.Collection;
@@ -17,9 +18,9 @@ import java.util.Objects;
  * Represents an entity within the domain model.
  *
  * <p>{@code DomainEntities} are expected to enforce their domain invariants and expose meaningful
- * behavior, ensuring the integrity and consistency of the domain model.
+ * behaviour, ensuring the integrity and consistency of the domain model.
  *
- * <p>Fields should be declared in order of importance to the concept being modeled.
+ * <p>Fields should be declared in order of importance to the concept being modelled.
  */
 @MappedSuperclass
 public abstract class DomainEntity implements TechnicalID<Integer> {
@@ -45,7 +46,9 @@ public abstract class DomainEntity implements TechnicalID<Integer> {
    *
    * @see TechnicalID
    */
-  @Id @GeneratedValue private Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
   /**
    * Base constructor for {@code DomainEntity}.

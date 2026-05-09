@@ -10,6 +10,8 @@ import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import java.time.Instant;
 import java.util.Objects;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,10 +37,11 @@ public class SongLookup extends DomainEntity {
   @MapsId
   private Song song;
 
-  /** The {@link Status} for the {@link Lookup} job of the {@link Song}. */
+  /** The {@link JobStatus} for the {@link Lookup} job of the {@link Song}. */
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
-  private Status status;
+  @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+  private JobStatus status;
 
   /**
    * The last time the {@link Song} was looked up. Specifically, the last time the {@link Lookup}
@@ -49,7 +52,7 @@ public class SongLookup extends DomainEntity {
    * @implNote Nullable, as a {@link Song} can never have been looked up before.
    * @see #lastModified
    */
-  private Instant lastLookup;
+  @Column private Instant lastLookup;
 
   /**
    * The last time this was modified.
@@ -84,7 +87,7 @@ public class SongLookup extends DomainEntity {
     }
     this.song = song;
 
-    this.status = Status.PENDING;
+    this.status = JobStatus.PENDING;
     this.lastModified = Instant.now();
     this.failed = 0;
   }
@@ -94,18 +97,18 @@ public class SongLookup extends DomainEntity {
   }
 
   void start() {
-    if (status.equals(Status.PROCESSING)) {
+    if (status.equals(JobStatus.PROCESSING)) {
       throw new IllegalStateException(
           "Cannot start %s#Lookup. It is already in progress.".formatted(song.log()));
     }
 
-    if (status.equals(Status.DONE)) {
+    if (status.equals(JobStatus.DONE)) {
       log.trace(
           "{}#Lookup was successfully looked-up and has now re-entered the lookup queue.",
           song.log());
       failed = 0;
     }
-    status = Status.PROCESSING;
+    status = JobStatus.PROCESSING;
     lastModified = Instant.now();
   }
 
@@ -115,21 +118,21 @@ public class SongLookup extends DomainEntity {
   void failed() {
     failed++;
     if (failed > MAX_ATTEMPT) {
-      this.status = Status.INVALID;
+      this.status = JobStatus.INVALID;
       log.warn(
           "Sentinel: {} exceeded failure threshold ({}). No further.", this.log(), MAX_ATTEMPT);
     } else {
-      this.status = Status.PENDING;
+      this.status = JobStatus.PENDING;
     }
     lastLookup = Instant.now();
     lastModified = Instant.now();
   }
 
-  void finish(Status status) {
-    if (status.equals(Status.PROCESSING)) {
+  void finish(JobStatus status) {
+    if (status.equals(JobStatus.PROCESSING)) {
       throw new IllegalArgumentException(
           "Cannot finish %s#Lookup with a status of '%s'."
-              .formatted(song.log(), Status.PROCESSING));
+              .formatted(song.log(), JobStatus.PROCESSING));
     }
 
     this.status = status;
@@ -137,7 +140,7 @@ public class SongLookup extends DomainEntity {
     lastModified = Instant.now();
   }
 
-  enum Status {
+  enum JobStatus {
     /** The lookup is awaiting further processing. */
     PENDING,
     /**
