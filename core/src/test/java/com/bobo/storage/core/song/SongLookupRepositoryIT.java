@@ -1,30 +1,25 @@
 package com.bobo.storage.core.song;
 
 import com.bobo.semantic.IntegrationTest;
+import com.bobo.semantic.TestInfrastructure;
+import com.bobo.storage.core.semantic.RepositoryTest;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.Random;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.postgresql.PostgreSQLContainer;
 
 @IntegrationTest({SongLookupRepository.class, CrudRepository.class})
-@DataJpaTest
-@Testcontainers
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ActiveProfiles("test")
+@RepositoryTest
 class SongLookupRepositoryIT {
 
   @Container @ServiceConnection
-  static PostgreSQLContainer database = new PostgreSQLContainer("postgres:14.12-bullseye");
+  private static final JdbcDatabaseContainer<?> database = TestInfrastructure.getDatabase();
 
   // Test Utilities
 

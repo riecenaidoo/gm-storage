@@ -1,9 +1,11 @@
 package com.bobo.storage.core.playlist.song;
 
 import com.bobo.semantic.IntegrationTest;
+import com.bobo.semantic.TestInfrastructure;
 import com.bobo.storage.core.playlist.Playlist;
 import com.bobo.storage.core.playlist.PlaylistMother;
 import com.bobo.storage.core.playlist.PlaylistTestRepository;
+import com.bobo.storage.core.semantic.RepositoryTest;
 import com.bobo.storage.core.song.Song;
 import com.bobo.storage.core.song.SongMother;
 import com.bobo.storage.core.song.SongTestRepository;
@@ -12,12 +14,17 @@ import java.util.Random;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.data.repository.CrudRepository;
+import org.testcontainers.containers.JdbcDatabaseContainer;
+import org.testcontainers.junit.jupiter.Container;
 
 @IntegrationTest({PlaylistSongRepository.class, CrudRepository.class})
-@DataJpaTest
+@RepositoryTest
 class PlaylistSongRepositoryIT {
+
+  @Container @ServiceConnection
+  private static final JdbcDatabaseContainer<?> database = TestInfrastructure.getDatabase();
 
   // Test Utilities
 

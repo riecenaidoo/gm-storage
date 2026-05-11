@@ -3,6 +3,7 @@ package com.bobo.storage;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.bobo.semantic.IntegrationTest;
+import com.bobo.semantic.TestInfrastructure;
 import com.bobo.storage.core.playlist.Playlist;
 import com.bobo.storage.core.playlist.PlaylistMother;
 import com.bobo.storage.core.playlist.PlaylistService;
@@ -17,18 +18,26 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.testcontainers.containers.JdbcDatabaseContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import tools.jackson.databind.ObjectMapper;
 
 @IntegrationTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @SpringBootTest(classes = App.class)
+@Testcontainers
 public class AcceptanceIT {
+
+  @Container @ServiceConnection
+  private static final JdbcDatabaseContainer<?> database = TestInfrastructure.getDatabase();
 
   private final PlaylistService playlists;
 
