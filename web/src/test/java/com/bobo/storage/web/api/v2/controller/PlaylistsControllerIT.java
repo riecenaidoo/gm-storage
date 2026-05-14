@@ -23,13 +23,13 @@ import com.bobo.storage.web.WebTestApplication;
 import com.bobo.storage.web.api.v2.request.PlaylistsCreateRequest;
 import com.bobo.storage.web.api.v2.request.PlaylistsPatchRequest;
 import com.bobo.storage.web.api.v2.response.PlaylistResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Stream;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -39,13 +39,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.lang.NonNull;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import tools.jackson.databind.ObjectMapper;
 
 @IntegrationTest({PlaylistsController.class, ObjectMapper.class, ControllerExceptionHandler.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -276,7 +276,7 @@ class PlaylistsControllerIT {
    * @return stream of all {@code requests} that target a specific {@code Playlist} resource.
    * @see #playlistNotFound
    */
-  private Stream<TestSourceRequest> playlistRequests() throws Exception {
+  private Stream<TestSourceRequest> playlistRequests() {
     // Given
     final int id = random.nextInt(100);
 
