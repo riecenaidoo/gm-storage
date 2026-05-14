@@ -2,8 +2,8 @@ package com.bobo.storage.core.playlist;
 
 import com.bobo.storage.core.semantic.EntityRepository;
 import java.util.Collection;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -13,11 +13,9 @@ import org.springframework.stereotype.Repository;
 interface PlaylistRepository
     extends EntityRepository<Playlist, Integer>, CrudRepository<Playlist, Integer> {
 
-  @NonNull
-  <S extends Playlist> Collection<S> saveAll(@NonNull Iterable<S> entities);
+  @NonNull <S extends Playlist> Collection<S> saveAll(@NonNull Iterable<S> entities);
 
-  @NonNull
-  Collection<Playlist> findAll();
+  @NonNull Collection<Playlist> findAll();
 
   /**
    * @param nameFragment fragment of a {@link Playlist} {@code name} to search for. Neither {@code

@@ -10,19 +10,19 @@ import com.bobo.storage.core.song.Song;
 import com.bobo.storage.core.song.SongMother;
 import com.bobo.storage.core.song.SongService;
 import com.bobo.storage.web.api.v2.request.SongsCreateRequest;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Random;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import tools.jackson.databind.ObjectMapper;
 
 @IntegrationTest
 @ActiveProfiles("test")

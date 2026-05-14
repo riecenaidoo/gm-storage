@@ -1,8 +1,6 @@
 package com.bobo.storage.web.api.request;
 
 import com.bobo.semantic.IntegrationTest;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
@@ -11,8 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Tests that {@code Request(s)} as expected by the Jackson {@link ObjectMapper}, when using the
@@ -33,7 +32,8 @@ class RequestIT {
   }
 
   /**
-   * @see Jdk8Module
+   * @see tools.jackson.databind.ext.jdk8.Jdk8OptionalSerializer
+   * @see tools.jackson.databind.ext.jdk8.Jdk8OptionalDeserializer
    */
   @Nested
   class Optionals {
