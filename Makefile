@@ -214,6 +214,7 @@ format-untracked: java-dev	##> run formatting on untracked files
 	$(UNTRACKED_FILES) -- '*.java' | $(FORMAT)
 
 format-all: java-dev	##> run formatting on all files
+	git add --renormalize .
 	find . .scripts/ application/ core/ web/ semantic/ -type f -print0 | $(TRIM)
 	find . -type f -name '*.java' -print0 | $(FORMAT)
 
