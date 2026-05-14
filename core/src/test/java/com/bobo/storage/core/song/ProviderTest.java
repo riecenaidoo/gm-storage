@@ -1,9 +1,8 @@
 package com.bobo.storage.core.song;
 
 import com.bobo.semantic.UnitTest;
-import java.net.URI;
-import java.net.URL;
 import java.util.Arrays;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -17,12 +16,10 @@ class ProviderTest {
    * The statement
    *
    * <pre>
-   *   {@code URI.create(endpoint).toURL()}
+   *   {@code URI.create(endpoint)}
    * </pre>
    *
-   * in the constructor , throws a checked {@code Exception}. This cannot be propagated using the
-   * {@code throws} declaration as {@code Provider} is an {@code Enum}, therefore its constructor
-   * cannot have a {@code throws} declaration.
+   * in the constructor , throws a {@code RuntimeException}.
    *
    * <p>If there is a problem with the syntax of any provider's {@code endpoint} it will fail at
    * runtime, so this test exists solely to check if the {@code Provider} enumeration can be
@@ -31,7 +28,7 @@ class ProviderTest {
    * <p>I've done this as a {@code BeforeAll} because if this precondition fails, no other test
    * cases could ever execute.
    *
-   * @see Provider#Provider(String)
+   * @see Provider#Provider(String, Set)
    */
   @SuppressWarnings("JavadocReference")
   @BeforeAll
@@ -52,20 +49,23 @@ class ProviderTest {
   }
 
   /**
-   * @see Provider#getQuery(URL)
+   * @see Provider#getQuery(Song)
    */
   @DisplayName("Providers can create the oEmbed query")
   @Test
   void getQuery() {
-    URL url =
-        Assertions.assertDoesNotThrow(
-            () -> (URI.create("https://www.youtube.com/watch?v=rdwz7QiG0lk")).toURL(),
-            "Test assumption failed. The control URL is actually invalid.");
+    Song song = new SongMother().withUrls().get();
     for (Provider provider : Provider.values()) {
       Assertions.assertDoesNotThrow(
-          () -> provider.getQuery(url),
+          () -> provider.getQuery(song),
           "%s enumeration fails to create the oEmbed query from a valid URL."
               .formatted(provider.name()));
     }
+  }
+
+  @Test
+  void likelyProvides() {
+    Assertions.assertTrue(
+        Provider.YOUTUBE.likelyProvides(new Song("https://www.youtube.com/watch?v=rdwz7QiG0lk")));
   }
 }

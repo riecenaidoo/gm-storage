@@ -1,7 +1,6 @@
 package com.bobo.storage.core.song;
 
 import com.bobo.semantic.UnitTest;
-import java.time.LocalDateTime;
 import java.util.Random;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +10,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestClient;
 
 @UnitTest(Song.class)
 class SongTest {
@@ -83,40 +82,6 @@ class SongTest {
           IllegalArgumentException.class,
           // When
           () -> new Song(suspiciouslyLongUrl));
-    }
-  }
-
-  /**
-   * @see Song#lookedUp()
-   * @see Song#setUrl(String)
-   */
-  @Nested
-  @DisplayName("LastLookup time is coupled to the URL.")
-  class LastLookup {
-
-    @Test
-    @DisplayName("If the URL is changed, lastLookup should be cleared.")
-    void setUrl() {
-      // Given
-      Song song = mother.get();
-      song.lookedUp();
-      // When
-      song.setUrl(mother.get().getUrl());
-      // Then
-      Assertions.assertNull(song.getLastLookup());
-    }
-
-    @Test
-    @DisplayName("If the URL is unchanged, lastLookup should remain as is.")
-    void setSameUrl() {
-      // Given
-      Song song = mother.get();
-      song.lookedUp();
-      LocalDateTime lastLookup = song.getLastLookup();
-      // When
-      song.setUrl(song.getUrl());
-      // Then
-      Assertions.assertEquals(lastLookup, song.getLastLookup());
     }
   }
 
@@ -434,7 +399,7 @@ class SongTest {
   }
 
   /**
-   * @see Song#poll(WebClient)
+   * @see Song#poll(RestClient)
    * @see SongIT#poll(SongIT.RedirectingURL)
    * @implNote Functionality verified by the IT, but correctness and expectations should still be
    *     tested.

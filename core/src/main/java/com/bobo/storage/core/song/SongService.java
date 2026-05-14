@@ -7,6 +7,7 @@ import com.bobo.storage.core.semantic.DomainEntity;
 import com.bobo.storage.core.semantic.EntityService;
 import com.bobo.storage.core.semantic.Read;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -20,10 +21,14 @@ public class SongService implements EntityService<Song>, Create<Song>, Read<Song
 
   private final SongRepository songs;
 
+  private final SongLookupRepository lookups;
+
   private final Collection<SongMigration> migrations;
 
-  SongService(SongRepository songs, Collection<SongMigration> migrations) {
+  SongService(
+      SongRepository songs, SongLookupRepository lookups, Collection<SongMigration> migrations) {
     this.songs = songs;
+    this.lookups = lookups;
     this.migrations = migrations;
   }
 
@@ -38,38 +43,20 @@ public class SongService implements EntityService<Song>, Create<Song>, Read<Song
   public Song add(Song song) {
     if (Objects.nonNull(song.getId())) throw new IllegalArgumentException();
 
-    return songs.findByUrl(song.getUrl()).orElseGet(() -> songs.save(song));
+    Optional<Song> existingSong = songs.findByUrl(song.getUrl());
+    if (existingSong.isPresent()) {
+      return existingSong.get();
+    }
+
+    song = songs.save(song);
+    lookups.save(new SongLookup(song));
+    return song;
   }
 
   @Override
   @Transactional(readOnly = true)
   public Optional<Song> find(int id) {
     return songs.findById(id);
-  }
-
-  /**
-   * @return a {@link Collection} of all {@link Song} resources that are eligible for a lookup;
-   *     never null.
-   * @see Song#lookedUp()
-   * @see LookupService
-   * @apiNote In future, we will accept a {@code limit} parameter to control the return size.
-   * @implSpec {@link Read#get()}
-   * @implNote In future, we will mark songs as eligible for a lookup, after a configurable period
-   *     has past since their last lookup. Those that have never been looked up will be given
-   *     priority.
-   *     <p>Currently, the expected number of {@code Song} entities requiring lookup at any given
-   *     time is small (typically 0-4), and the total table size remains well below 1000 entries.
-   *     Because of this, batch processing or paging is not implemented. However, if the dataset
-   *     grows significantly, it will be necessary to introduce paging or limit batch size to avoid
-   *     performance or memory issues.
-   *     <p>TODO: Refer to the <a
-   *     href="https://www.postgresql.org/docs/current/indexes-partial.html">Partial Index</a>
-   *     documentation for PostgresSQL to create an index targeting null values for last lookups, or
-   *     explore other optimization strategies to improve query performance.
-   */
-  @Transactional(readOnly = true)
-  public Collection<Song> getLookupCandidates() {
-    return songs.findAllByLastLookupIsNull();
   }
 
   /**
@@ -92,9 +79,35 @@ public class SongService implements EntityService<Song>, Create<Song>, Read<Song
           song.log(),
           existingSong.get().log());
       migrations.forEach(migration -> migration.migrate(song, existingSong.get()));
+
+      lookups.findBySong(song).ifPresent(lookups::delete);
       songs.delete(song);
     } else {
       songs.save(song);
     }
+  }
+
+  /**
+   * Ensure that system-wide {@link Song} invariants have been maintained.
+   *
+   * <p>Verifies that all {@link Song} have an associated {@link SongLookup} job, creating them if
+   * they are missing.
+   *
+   * @apiNote This is provided to support bulk loading of data directly into the database.
+   */
+  @Transactional
+  public void verify() {
+    if (songs.count() == lookups.count()) {
+      log.trace("Ma'at: There is order.");
+      return;
+    }
+
+    Collection<Song> joblessSongs = songs.findJoblessSongs();
+    List<SongLookup> jobs = joblessSongs.stream().map(SongLookup::new).toList();
+    lookups.saveAll(jobs);
+
+    log.warn(
+        "Ma'at: An imbalance was found amongst {}. Order has been restored.",
+        DomainEntity.log(joblessSongs));
   }
 }
