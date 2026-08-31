@@ -1,6 +1,9 @@
 package com.bobo.storage.core.song;
 
+import static com.bobo.storage.core.semantic.AccessForTesting.Modifier.PACKAGE_PRIVATE;
+
 import com.bobo.semantic.TechnicalID;
+import com.bobo.storage.core.semantic.AccessForTesting;
 import com.bobo.storage.core.semantic.DomainEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -138,6 +141,31 @@ public class SongLookup extends DomainEntity {
     this.status = status;
     lastLookup = Instant.now();
     lastModified = Instant.now();
+  }
+
+  @AccessForTesting(PACKAGE_PRIVATE)
+  JobStatus getStatus() {
+    return status;
+  }
+
+  @AccessForTesting(PACKAGE_PRIVATE)
+  void setStatus(JobStatus status) {
+    this.status = status;
+  }
+
+  @AccessForTesting(PACKAGE_PRIVATE)
+  void setLastLookup(Instant lastLookup) {
+    this.lastLookup = lastLookup;
+  }
+
+  @AccessForTesting(PACKAGE_PRIVATE)
+  void setLastModified(Instant lastModified) {
+    this.lastModified = lastModified;
+  }
+
+  @AccessForTesting(PACKAGE_PRIVATE)
+  void setFailed(short failed) {
+    this.failed = failed;
   }
 
   enum JobStatus {
