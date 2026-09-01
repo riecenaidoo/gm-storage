@@ -5,8 +5,8 @@ import com.bobo.semantic.TestInfrastructure;
 import com.bobo.storage.core.semantic.RepositoryTest;
 import java.util.Collection;
 import java.util.Random;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -14,6 +14,12 @@ import org.springframework.data.repository.CrudRepository;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.junit.jupiter.Container;
 
+/**
+ * Non-exhaustive persistence layer integration tests.
+ *
+ * <p>Given a valid entity and repository, can Data JPA still persist it and derive these repository
+ * methods correctly?
+ */
 @IntegrationTest({PlaylistRepository.class, CrudRepository.class})
 @RepositoryTest
 class PlaylistRepositoryIT {
@@ -21,9 +27,13 @@ class PlaylistRepositoryIT {
   @Container @ServiceConnection
   private static final JdbcDatabaseContainer<?> database = TestInfrastructure.getDatabase();
 
-  private final PlaylistRepository repository;
+  // Test Utilities
 
   private final Random random = new Random();
+
+  // Test Targets
+
+  private final PlaylistRepository repository;
 
   @Autowired
   PlaylistRepositoryIT(PlaylistRepository repository) {
@@ -31,166 +41,35 @@ class PlaylistRepositoryIT {
   }
 
   /**
-   * Expecting generated query to use {@code WHERE} clause with a {@code LIKE '%...%'}, and to wrap
-   * operands in {@code upper()/lower()} for case insensitivity.
-   *
    * @see PlaylistRepository#findAllByNameContainingIgnoringCase(String)
    */
-  @Nested
-  class FindAllByNameContainingIgnoringCase {
+  @Test
+  void findAllByNameContainingIgnoringCase() {
+    // Given
+    PlaylistMother mother = new PlaylistMother(random);
+    Collection<Playlist> playlists =
+        Stream.of(
+                "Rhythm & Relaxation",
+                "Softness & Relaxation",
+                "Summer Warmth",
+                "Chill Vibes",
+                "Salsa",
+                "Nostalgia - 2022",
+                "Nostalgia - 2024")
+            .map(name -> mother.withNames(() -> name).get())
+            .toList();
+    repository.saveAll(playlists);
 
-    @Test
-    void byExactName() {
-      // Given
-      Playlist playlist = new PlaylistMother(random).withNames().get();
-      playlist = repository.save(playlist);
+    // When
+    String nameFragmentQuery = "relax";
+    playlists = repository.findAllByNameContainingIgnoringCase(nameFragmentQuery);
+
+    // Then
+    Assertions.assertEquals(2, playlists.size());
+    for (Playlist playlist : playlists) {
       Assertions.assertTrue(
-          repository.findById(playlist.getId()).isPresent(), "Test assumption failed.");
-
-      // When
-      Collection<Playlist> playlists =
-          repository.findAllByNameContainingIgnoringCase(playlist.getName());
-
-      // Then
-      Assertions.assertTrue(playlists.contains(playlist));
-    }
-
-    /** Repeat {@link #byExactName()} exactly, but set arg to {@code toLower}. */
-    @Test
-    void byExactNameIgnoringCase() {
-      // Given
-      Playlist playlist = new PlaylistMother(random).withNames().get();
-      playlist = repository.save(playlist);
-      Assertions.assertTrue(
-          repository.findById(playlist.getId()).isPresent(), "Test assumption failed.");
-
-      // When
-      Collection<Playlist> playlists =
-          repository.findAllByNameContainingIgnoringCase(playlist.getName().toLowerCase());
-
-      // Then
-      Assertions.assertTrue(playlists.contains(playlist));
-    }
-
-    @Test
-    void byPartialName() {
-      // Given
-      Playlist playlist = new PlaylistMother(random).withNames(() -> "Some Long Name").get();
-      playlist = repository.save(playlist);
-      Assertions.assertTrue(
-          repository.findById(playlist.getId()).isPresent(), "Test assumption failed.");
-
-      // When
-      for (String partialName : playlist.getName().split(" ")) {
-        Collection<Playlist> playlists =
-            repository.findAllByNameContainingIgnoringCase(partialName);
-
-        // Then
-        Assertions.assertTrue(
-            playlists.contains(playlist),
-            "Partial: %s should match, but doesn't.".formatted(partialName));
-      }
-    }
-
-    /** Repeat {@link #byPartialName()} exactly, but set arg to {@code toLower}. */
-    @Test
-    void byPartialNameIgnoringCase() {
-      // Given
-      Playlist playlist = new PlaylistMother(random).withNames(() -> "Some Long Name").get();
-      playlist = repository.save(playlist);
-      Assertions.assertTrue(
-          repository.findById(playlist.getId()).isPresent(), "Test assumption failed.");
-
-      // When
-      for (String partialName : playlist.getName().split(" ")) {
-        partialName = partialName.toLowerCase();
-        Collection<Playlist> playlists =
-            repository.findAllByNameContainingIgnoringCase(partialName);
-
-        // Then
-        Assertions.assertTrue(
-            playlists.contains(playlist),
-            "Partial: %s should match, but doesn't.".formatted(partialName));
-      }
-    }
-
-    /** Sanity test that the query doesn't bring back everything. */
-    @Test
-    void onlyIfMatch() {
-      // Given
-      Playlist playlist = new PlaylistMother(random).withNames(() -> "Some Name").get();
-      playlist = repository.save(playlist);
-      Assertions.assertTrue(
-          repository.findById(playlist.getId()).isPresent(), "Test assumption failed.");
-
-      // When
-      String argumentThatShouldNotMatch = "Other";
-      Assertions.assertNotEquals(
-          argumentThatShouldNotMatch, playlist.getName(), "Test assumption failed.");
-      Assertions.assertFalse(
-          playlist.getName().contains(argumentThatShouldNotMatch), "Test assumption failed.");
-
-      Collection<Playlist> playlists =
-          repository.findAllByNameContainingIgnoringCase(argumentThatShouldNotMatch);
-
-      // Then
-      Assertions.assertFalse(playlists.contains(playlist));
-      Assertions.assertTrue(playlists.isEmpty());
-    }
-
-    /**
-     * Confirm that there are no false positives when there are {@code Playlists} with similar
-     * names, but the argument is the only found in the one.
-     */
-    @Test
-    void similarNameButArgumentDifferent() {
-      // Given
-      PlaylistMother mother = new PlaylistMother(random).withNames(() -> "Similar Name");
-      Playlist similarPlaylist = mother.get();
-      Playlist playlist = mother.get();
-      String differenceBetweenThem = " Delta";
-      playlist.setName(playlist.getName() + differenceBetweenThem);
-      repository.save(similarPlaylist);
-      repository.save(playlist);
-      Assertions.assertTrue(
-          repository.findById(playlist.getId()).isPresent(), "Test assumption failed.");
-      Assertions.assertTrue(
-          repository.findById(similarPlaylist.getId()).isPresent(), "Test assumption failed.");
-
-      // When
-      Collection<Playlist> playlists =
-          repository.findAllByNameContainingIgnoringCase(differenceBetweenThem);
-
-      // Then
-      Assertions.assertFalse(playlists.contains(similarPlaylist));
-      Assertions.assertTrue(playlists.contains(playlist));
-    }
-
-    @Test
-    void emptyCollectionIfNoMatch() {
-      // Given
-      Collection<Playlist> playlists =
-          new PlaylistMother(random).withNames(() -> "Some Name").get(5).toList();
-      playlists = repository.saveAll(playlists);
-      for (Playlist playlist : playlists) {
-        Assertions.assertTrue(
-            repository.findById(playlist.getId()).isPresent(), "Test assumption failed.");
-      }
-
-      // When
-      String argumentThatShouldNotMatch = "Other";
-      for (Playlist playlist : playlists) {
-        Assertions.assertNotEquals(
-            argumentThatShouldNotMatch, playlist.getName(), "Test assumption failed.");
-        Assertions.assertFalse(
-            playlist.getName().contains(argumentThatShouldNotMatch), "Test assumption failed.");
-      }
-
-      Collection<Playlist> queryResult =
-          repository.findAllByNameContainingIgnoringCase(argumentThatShouldNotMatch);
-
-      // Then
-      Assertions.assertTrue(queryResult.isEmpty());
+          playlist.getName().toLowerCase().contains(nameFragmentQuery),
+          "Query returned result that does not contain name fragment.");
     }
   }
 }

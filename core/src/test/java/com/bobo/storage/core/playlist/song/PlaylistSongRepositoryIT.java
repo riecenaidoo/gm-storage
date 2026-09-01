@@ -24,8 +24,8 @@ import org.testcontainers.junit.jupiter.Container;
 /**
  * Non-exhaustive persistence layer integration tests.
  *
- * <p>Given a valid {@link PlaylistSong} entity and repository, can Spring Data JPA still persist it
- * and derive these repository methods correctly?
+ * <p>Given a valid entity and repository, can Data JPA still persist it and derive these repository
+ * methods correctly?
  */
 @IntegrationTest({PlaylistSongRepository.class, CrudRepository.class})
 @RepositoryTest
