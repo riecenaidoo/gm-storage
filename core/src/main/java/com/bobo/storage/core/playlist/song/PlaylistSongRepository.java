@@ -14,7 +14,15 @@ import org.springframework.stereotype.Repository;
 interface PlaylistSongRepository
     extends EntityRepository<PlaylistSong, Integer>, CrudRepository<PlaylistSong, Integer> {
 
+  /**
+   * @return {@link PlaylistSong}(s) linked to the {@link Playlist}.
+   * @apiNote The {@link Collection} has no guarantees on order or uniqueness.
+   */
   Collection<PlaylistSong> findAllByPlaylist(Playlist playlist);
 
+  /**
+   * @return {@link PlaylistSong}(s) linked to the {@link Song}.
+   * @apiNote The {@link Collection} has no guarantees on order or uniqueness.
+   */
   Collection<PlaylistSong> findAllBySong(Song song);
 }

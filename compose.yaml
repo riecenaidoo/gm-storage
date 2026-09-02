@@ -13,7 +13,7 @@ services:
       - POSTGRES_PASSWORD=admin
     volumes:
       # This is where the DDL would go, for now it just is a placeholder.
-      - "../gm-storage/core/src/main/sql/:/docker-entrypoint-initdb.d/"
+      - "../gm-storage/core/src/main/resources/:/docker-entrypoint-initdb.d/"
       # Persist data between sessions.
       - data:/var/lib/postgresql/data
 volumes:
