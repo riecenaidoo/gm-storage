@@ -21,7 +21,7 @@ Pre-Push Check(s):
 # Branch Check
 # =============================================================================
 printf "[${YELLOW}%s${NONE}]\tChecking... " "Branch"
-if git branch --show-current | grep -q -E "\bmain\b|\bmaster\b|\bproject\b|\bproduction\b|\bdevelop\b|\bfeature\b"; then
+if git branch --show-current | grep -q -E "\bmain\b|\bmaster\b|\bproject\b|\bproduction\b|\bdevelop\b"; then
   printf "${RED}%s${NONE} - %s\n" "Failed!" "$(git branch --show-current) is a protected branch."
   exit 1
 fi
