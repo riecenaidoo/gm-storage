@@ -78,13 +78,7 @@ public class PlaylistSong extends DomainEntity {
     return song;
   }
 
-  @AccessForTesting(AccessForTesting.Modifier.PACKAGE_PRIVATE)
   void setSong(Song song) {
     this.song = song;
-  }
-
-  void migrate(Song to) {
-    // TODO Validate their URLs are the same.
-    setSong(to);
   }
 }

@@ -23,14 +23,15 @@ class PlaylistSongMigration implements SongMigration {
     this.playlistSongs = playlistSongs;
   }
 
+  @Override
   @Transactional
   public void migrate(Song from, Song to) {
     Collection<PlaylistSong> songsToTransfer = playlistSongs.findAllBySong(from);
     if (songsToTransfer.isEmpty()) {
-      log.trace("PlaylistSong#Migration: No PlaylistSongs associated with {}.", from);
+      log.trace("PlaylistSong#Migration: No PlaylistSongs associated with {}.", from.log());
       return;
     }
-    songsToTransfer.forEach(song -> song.migrate(to));
+    songsToTransfer.forEach(song -> song.setSong(to));
     playlistSongs.saveAll(songsToTransfer);
     log.info(
         "PlaylistSong#Migration: {} migrated from {} to {}.",

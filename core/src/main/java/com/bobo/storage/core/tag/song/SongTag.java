@@ -69,6 +69,10 @@ public class SongTag extends DomainEntity {
     return song;
   }
 
+  void setSong(Song song) {
+    this.song = song;
+  }
+
   public Tag getTag() {
     return tag;
   }
