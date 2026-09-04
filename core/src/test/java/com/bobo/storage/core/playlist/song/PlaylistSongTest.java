@@ -49,6 +49,16 @@ class PlaylistSongTest {
           IllegalArgumentException.class, () -> new PlaylistSong(playlist, song));
     }
 
+    @Test
+    @DisplayName("Song argument must have an assigned TechnicalId")
+    void unassignedSong() {
+      Playlist playlist = new PlaylistMother(random).withIds().get();
+      Song song = new SongMother(random).withIds(() -> null).get();
+
+      Assertions.assertThrows(
+          IllegalArgumentException.class, () -> new PlaylistSong(playlist, song));
+    }
+
     /**
      * The contract language, {@code "A PlaylistSong can only be created by adding a Song into a
      * Playlist..."}, implies the existence of both the {@link Playlist} and {@link Song}.

@@ -1,10 +1,9 @@
-package com.bobo.storage.web.api.v2.controller;
+package com.bobo.storage.web.api.v2.playlist;
 
 import com.bobo.storage.core.playlist.Playlist;
 import com.bobo.storage.core.playlist.PlaylistService;
-import com.bobo.storage.web.api.v2.request.PlaylistsCreateRequest;
-import com.bobo.storage.web.api.v2.request.PlaylistsPatchRequest;
-import com.bobo.storage.web.api.v2.response.PlaylistResponse;
+import com.bobo.storage.web.api.v2.RequestConstraintViolationException;
+import com.bobo.storage.web.api.v2.ResourceNotFoundException;
 import com.bobo.storage.web.semantic.ResourceController;
 import java.net.URI;
 import java.util.Collection;
@@ -32,11 +31,10 @@ public class PlaylistsController {
 
   @PostMapping
   public ResponseEntity<PlaylistResponse> createPlaylist(
-      @RequestBody PlaylistsCreateRequest request) {
+      @RequestBody PlaylistCreateRequest request) {
     Playlist playlist = request.toCreate();
     playlist = playlists.add(playlist);
     PlaylistResponse response = new PlaylistResponse(playlist);
-    // TODO [design] I am beginning to see how I should define the Resource abstraction.
     URI resource =
         ServletUriComponentsBuilder.fromCurrentRequestUri()
             .path(String.format("/%d", playlist.getId()))
@@ -78,7 +76,7 @@ public class PlaylistsController {
 
   @PatchMapping("/{id}")
   public ResponseEntity<PlaylistResponse> updatePlaylist(
-      @PathVariable int id, @RequestBody PlaylistsPatchRequest request) {
+      @PathVariable int id, @RequestBody PlaylistPatchRequest request) {
     Playlist playlist =
         playlists.find(id).orElseThrow(() -> new ResourceNotFoundException(Playlist.class, id));
     request.patch(playlist);

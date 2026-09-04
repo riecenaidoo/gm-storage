@@ -1,4 +1,4 @@
-package com.bobo.storage.web.api.v2.controller;
+package com.bobo.storage.web.api.v2.playlist;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyInt;
@@ -20,9 +20,7 @@ import com.bobo.storage.core.playlist.PlaylistMother;
 import com.bobo.storage.core.playlist.PlaylistService;
 import com.bobo.storage.core.semantic.EntityMother;
 import com.bobo.storage.web.WebTestApplication;
-import com.bobo.storage.web.api.v2.request.PlaylistsCreateRequest;
-import com.bobo.storage.web.api.v2.request.PlaylistsPatchRequest;
-import com.bobo.storage.web.api.v2.response.PlaylistResponse;
+import com.bobo.storage.web.api.v2.ControllerExceptionHandler;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -77,14 +75,14 @@ class PlaylistsControllerIT {
   }
 
   /**
-   * @see PlaylistsController#createPlaylist(PlaylistsCreateRequest)
+   * @see PlaylistsController#createPlaylist(PlaylistCreateRequest)
    */
   @DisplayName("POST /playlists")
   @Test
   void createPlaylist() throws Exception {
     // Given
     String validName = new PlaylistMother(random).withNames().get().getName();
-    PlaylistsCreateRequest request = new PlaylistsCreateRequest(validName);
+    PlaylistCreateRequest request = new PlaylistCreateRequest(validName);
     String requestPayload = mapper.writeValueAsString(request);
 
     final int id = random.nextInt(1, 101);
@@ -212,9 +210,9 @@ class PlaylistsControllerIT {
   }
 
   /**
-   * @see PlaylistsController#updatePlaylist(int, PlaylistsPatchRequest)
+   * @see PlaylistsController#updatePlaylist(int, PlaylistPatchRequest)
    */
-  @DisplayName("PATCH /playlists{id}")
+  @DisplayName("PATCH /playlists/{id}")
   @Test
   void updatePlaylist() throws Exception {
     // Given
@@ -223,7 +221,7 @@ class PlaylistsControllerIT {
     Integer id = playlist.getId();
 
     String anotherValidName = mother.withNames().get().getName();
-    PlaylistsPatchRequest request = new PlaylistsPatchRequest(Optional.of(anotherValidName));
+    PlaylistPatchRequest request = new PlaylistPatchRequest(Optional.of(anotherValidName));
     String payload = mapper.writeValueAsString(request);
 
     Playlist updatedPlaylist = request.patch(new Playlist(playlist));
@@ -286,7 +284,7 @@ class PlaylistsControllerIT {
         new TestSourceRequest("DELETE /playlists/{id}", delete("/api/v2/playlists/{id}", id)));
 
     String validPlaylistName = new PlaylistMother(random).withNames().get().getName();
-    PlaylistsPatchRequest patchRequest = new PlaylistsPatchRequest(Optional.of(validPlaylistName));
+    PlaylistPatchRequest patchRequest = new PlaylistPatchRequest(Optional.of(validPlaylistName));
     String patchPayload = mapper.writeValueAsString(patchRequest);
     var patch =
         patch("/api/v2/playlists/{id}", id)

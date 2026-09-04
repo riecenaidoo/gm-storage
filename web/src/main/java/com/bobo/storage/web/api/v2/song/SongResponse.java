@@ -1,8 +1,9 @@
-package com.bobo.storage.web.api.v2.response;
+package com.bobo.storage.web.api.v2.song;
 
-import com.bobo.storage.core.playlist.song.PlaylistSong;
+import com.bobo.storage.core.song.Song;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Optional;
 
 /**
@@ -12,19 +13,19 @@ import java.util.Optional;
  * <p>TODO Consider defining this globally.
  */
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
-public record PlaylistSongResponse(
+public record SongResponse(
     Integer id,
     String url,
     Optional<String> title,
     Optional<String> artist,
     @JsonProperty("thumbnail_url") Optional<String> thumbnailUrl) {
 
-  public PlaylistSongResponse(PlaylistSong playlistSong) {
+  public SongResponse(Song song) {
     this(
-        playlistSong.getId(),
-        playlistSong.getSong().getUrl(),
-        playlistSong.getSong().getTitle(),
-        playlistSong.getSong().getArtist(),
-        playlistSong.getSong().getThumbnailUrl());
+        song.getId(),
+        song.getUrl(),
+        song.getTitle(),
+        song.getArtist(),
+        song.getThumbnailUrl());
   }
 }

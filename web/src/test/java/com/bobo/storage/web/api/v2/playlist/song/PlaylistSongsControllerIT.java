@@ -1,4 +1,4 @@
-package com.bobo.storage.web.api.v2.controller;
+package com.bobo.storage.web.api.v2.playlist.song;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -19,10 +19,12 @@ import com.bobo.storage.core.playlist.song.PlaylistSong;
 import com.bobo.storage.core.playlist.song.PlaylistSongMother;
 import com.bobo.storage.core.playlist.song.PlaylistSongService;
 import com.bobo.storage.core.semantic.EntityMother;
+import com.bobo.storage.core.song.Song;
 import com.bobo.storage.core.song.SongMother;
+import com.bobo.storage.core.song.SongService;
 import com.bobo.storage.web.WebTestApplication;
-import com.bobo.storage.web.api.v2.request.SongsCreateRequest;
-import com.bobo.storage.web.api.v2.response.PlaylistSongResponse;
+import com.bobo.storage.web.api.v2.ControllerExceptionHandler;
+import com.bobo.storage.web.api.v2.song.SongResponse;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -46,9 +48,11 @@ class PlaylistSongsControllerIT {
 
   // Mock Dependencies
 
+  @MockitoBean private PlaylistSongService playlistSongs;
+
   @MockitoBean private PlaylistService playlists;
 
-  @MockitoBean private PlaylistSongService playlistSongs;
+  @MockitoBean private SongService songs;
 
   // Test Utilities
 
@@ -71,46 +75,38 @@ class PlaylistSongsControllerIT {
   }
 
   /**
-   * @see PlaylistSongsController#createPlaylistSong(int, SongsCreateRequest)
+   * @see PlaylistSongsController#createPlaylistSong(int, PlaylistSongCreateRequest)
    */
-  @DisplayName("POST /playlists/{playlist_id}/songs")
+  @DisplayName("POST /playlists/{playlistId}/songs")
   @Test
   void createPlaylistSong() throws Exception {
     // Given
     Playlist playlist = new PlaylistMother(random).withIds().get();
+    Song song = new SongMother(random).withIds().get();
 
-    SongMother songMother = new SongMother(random);
-    String validUrl = songMother.withUrls().get().getUrl();
-    SongsCreateRequest request = new SongsCreateRequest(validUrl);
+    PlaylistSongCreateRequest request = new PlaylistSongCreateRequest(song.getId());
     String requestPayload = mapper.writeValueAsString(request);
 
-    // TODO figure out how to use PlaylistSong constructor
     final int id = random.nextInt(1, 101);
-    PlaylistSongResponse expectedResponse =
-        new PlaylistSongResponse(
-            id, validUrl, Optional.empty(), Optional.empty(), Optional.empty());
+    PlaylistSongResponse expectedResponse = new PlaylistSongResponse(id, new SongResponse(song));
     String expectedPayload = mapper.writeValueAsString(expectedResponse);
     String expectedURI =
         String.format(
             "%s/api/v2/playlists/%d/songs/%d",
             WebTestApplication.testSchemeAuthority(), playlist.getId(), id);
 
-    // Stubbing
-    /* TODO Reconsider the dependencies of this Controller. Am I stubbing too much?
-    		I don't think so, I'm really just setting ids tbh.
-    */
     when(playlists.find(playlist.getId())).thenReturn(Optional.of(playlist));
+    when(songs.find(song.getId())).thenReturn(Optional.of(song));
     when(playlistSongs.add(any(PlaylistSong.class)))
         .thenAnswer(
             invocation -> {
               PlaylistSong playlistSong = invocation.getArgument(0);
-              songMother.setId(playlistSong.getSong());
               return EntityMother.setId(playlistSong, id);
             });
 
     // When
     mvc.perform(
-            post("/api/v2/playlists/{playlist_id}/songs", playlist.getId(), id)
+            post("/api/v2/playlists/{playlistId}/songs", playlist.getId())
                 .with(WebTestApplication::testSchemeAuthority)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestPayload))
@@ -146,7 +142,7 @@ class PlaylistSongsControllerIT {
     when(playlistSongs.getFromPlaylist(playlist)).thenReturn(List.of(allPlaylistSongs));
 
     // When
-    mvc.perform(get("/api/v2/playlists/{playlist_id}/songs", playlist.getId()))
+    mvc.perform(get("/api/v2/playlists/{playlistId}/songs", playlist.getId()))
         // Then
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -157,7 +153,7 @@ class PlaylistSongsControllerIT {
    * @see PlaylistSongsController#removePlaylistSong(int, int)
    */
   @Test
-  @DisplayName("DELETE /playlists/{playlist_id}/songs/{id}")
+  @DisplayName("DELETE /playlists/{playlistId}/songs/{songId}")
   void removePlaylistSong() throws Exception {
     // Given
     PlaylistSong playlistSong = new PlaylistSongMother(random).withAll().get();
@@ -169,7 +165,7 @@ class PlaylistSongsControllerIT {
     when(playlistSongs.find(id)).thenReturn(Optional.of(playlistSong));
 
     // When
-    mvc.perform(delete("/api/v2/playlists/{playlist_id}/songs/{id}", playlistId, id))
+    mvc.perform(delete("/api/v2/playlists/{playlistId}/songs/{songId}", playlistId, id))
         // Then
         .andExpect(status().isNoContent())
         .andExpect(header().doesNotExist("content-type"));

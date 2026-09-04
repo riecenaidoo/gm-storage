@@ -1,4 +1,4 @@
-package com.bobo.storage.web.api.v2.controller;
+package com.bobo.storage.web.api.v2;
 
 import com.bobo.semantic.TechnicalID;
 

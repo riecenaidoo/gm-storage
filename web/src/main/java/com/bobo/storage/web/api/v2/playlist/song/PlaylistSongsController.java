@@ -1,4 +1,4 @@
-package com.bobo.storage.web.api.v2.controller;
+package com.bobo.storage.web.api.v2.playlist.song;
 
 import com.bobo.semantic.TechnicalID;
 import com.bobo.storage.core.playlist.Playlist;
@@ -6,8 +6,9 @@ import com.bobo.storage.core.playlist.PlaylistService;
 import com.bobo.storage.core.playlist.song.PlaylistSong;
 import com.bobo.storage.core.playlist.song.PlaylistSongService;
 import com.bobo.storage.core.song.Song;
-import com.bobo.storage.web.api.v2.request.SongsCreateRequest;
-import com.bobo.storage.web.api.v2.response.PlaylistSongResponse;
+import com.bobo.storage.core.song.SongService;
+import com.bobo.storage.web.api.v2.ResourceNotFoundException;
+import com.bobo.storage.web.api.v2.SubresourceMismatchException;
 import com.bobo.storage.web.semantic.ResourceController;
 import java.net.URI;
 import java.util.Collection;
@@ -28,25 +29,20 @@ public class PlaylistSongsController {
 
   private final PlaylistService playlists;
 
-  public PlaylistSongsController(PlaylistService playlists, PlaylistSongService playlistSongs) {
+  private final SongService songs;
+
+  public PlaylistSongsController(
+      PlaylistService playlists, PlaylistSongService playlistSongs, SongService songs) {
     this.playlistSongs = playlistSongs;
     this.playlists = playlists;
+    this.songs = songs;
   }
 
-  /**
-   * Create a {@link Song} within a {@link Playlist}.
-   *
-   * @param playlistId of the {@code Playlist} to create the {@code Song} within.
-   * @param request to create a {@code Song}.
-   */
+  /** Add a {@link Song} into a {@link Playlist}. */
   @PostMapping
   public ResponseEntity<PlaylistSongResponse> createPlaylistSong(
-      @PathVariable int playlistId, @RequestBody SongsCreateRequest request) {
-    Playlist playlist =
-        playlists
-            .find(playlistId)
-            .orElseThrow(() -> new ResourceNotFoundException(Playlist.class, playlistId));
-    PlaylistSong playlistSong = new PlaylistSong(playlist, request.toCreate());
+      @PathVariable int playlistId, @RequestBody PlaylistSongCreateRequest request) {
+    PlaylistSong playlistSong = request.toCreate(playlistId, playlists, songs);
     playlistSong = playlistSongs.add(playlistSong);
     PlaylistSongResponse response = new PlaylistSongResponse(playlistSong);
     URI resource =
@@ -69,17 +65,17 @@ public class PlaylistSongsController {
     return ResponseEntity.ok(response);
   }
 
-  @DeleteMapping("/{id}")
+  @DeleteMapping("/{songId}")
   public ResponseEntity<Void> removePlaylistSong(
-      @PathVariable int playlistId, @PathVariable int id) {
+      @PathVariable int playlistId, @PathVariable int songId) {
     Playlist playlist =
         playlists
             .find(playlistId)
             .orElseThrow(() -> new ResourceNotFoundException(Playlist.class, playlistId));
     PlaylistSong playlistSong =
         playlistSongs
-            .find(id)
-            .orElseThrow(() -> new ResourceNotFoundException(PlaylistSong.class, id));
+            .find(songId)
+            .orElseThrow(() -> new ResourceNotFoundException(PlaylistSong.class, songId));
     if (!TechnicalID.same(playlist, playlistSong.getPlaylist())) {
       throw new SubresourceMismatchException(playlist, playlistSong);
     }

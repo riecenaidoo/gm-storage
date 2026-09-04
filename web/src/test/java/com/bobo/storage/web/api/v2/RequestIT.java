@@ -1,4 +1,4 @@
-package com.bobo.storage.web.api.request;
+package com.bobo.storage.web.api.v2;
 
 import com.bobo.semantic.IntegrationTest;
 import java.util.Map;
