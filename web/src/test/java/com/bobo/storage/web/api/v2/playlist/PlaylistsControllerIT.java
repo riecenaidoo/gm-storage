@@ -116,7 +116,7 @@ class PlaylistsControllerIT {
   }
 
   /**
-   * @see PlaylistsController#readPlaylists(Optional)
+   * @see PlaylistsController#readPlaylists(PlaylistFilterQuery)
    */
   @Nested
   class ReadPlaylists {

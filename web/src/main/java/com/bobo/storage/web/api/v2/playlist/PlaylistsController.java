@@ -6,7 +6,6 @@ import com.bobo.storage.web.api.v2.RequestConstraintViolationException;
 import com.bobo.storage.web.api.v2.ResourceNotFoundException;
 import java.net.URI;
 import java.util.Collection;
-import java.util.Optional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -34,10 +33,10 @@ public class PlaylistsController implements PlaylistAPI {
   }
 
   @Override
-  public ResponseEntity<PlaylistResponse[]> readPlaylists(Optional<String> title) {
+  public ResponseEntity<PlaylistResponse[]> readPlaylists(PlaylistFilterQuery filters) {
     Collection<Playlist> playlists;
-    if (title.isPresent()) {
-      String search = title.get();
+    if (filters.title().isPresent()) {
+      String search = filters.title().get();
       if (search.isBlank()) {
         throw new RequestConstraintViolationException(
             "The 'title' parameter must not be blank if provided.");
