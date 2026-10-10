@@ -41,8 +41,16 @@ public class PlaylistSongsController {
   /** Add a {@link Song} into a {@link Playlist}. */
   @PostMapping
   public ResponseEntity<PlaylistSongResponse> createPlaylistSong(
-      @PathVariable int playlistId, @RequestBody PlaylistSongCreateRequest request) {
-    PlaylistSong playlistSong = request.toCreate(playlistId, playlists, songs);
+      @PathVariable int playlistId, @RequestBody int songId) {
+    Playlist playlist =
+        playlists
+            .find(playlistId)
+            .orElseThrow(() -> new ResourceNotFoundException(Playlist.class, playlistId));
+    Song song =
+        songs.find(songId).orElseThrow(() -> new ResourceNotFoundException(Song.class, songId));
+
+    PlaylistSong playlistSong = new PlaylistSong(playlist, song);
+
     playlistSong = playlistSongs.add(playlistSong);
     PlaylistSongResponse response = new PlaylistSongResponse(playlistSong);
     URI resource =

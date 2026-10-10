@@ -75,7 +75,7 @@ class PlaylistSongsControllerIT {
   }
 
   /**
-   * @see PlaylistSongsController#createPlaylistSong(int, PlaylistSongCreateRequest)
+   * @see PlaylistSongsController#createPlaylistSong(int, int)
    */
   @DisplayName("POST /playlists/{playlistId}/songs")
   @Test
@@ -84,7 +84,7 @@ class PlaylistSongsControllerIT {
     Playlist playlist = new PlaylistMother(random).withIds().get();
     Song song = new SongMother(random).withIds().get();
 
-    PlaylistSongCreateRequest request = new PlaylistSongCreateRequest(song.getId());
+    int request = song.getId();
     String requestPayload = mapper.writeValueAsString(request);
 
     final int id = random.nextInt(1, 101);
