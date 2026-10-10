@@ -9,21 +9,14 @@ import com.bobo.storage.core.song.Song;
 import com.bobo.storage.core.song.SongService;
 import com.bobo.storage.web.api.v2.ResourceNotFoundException;
 import com.bobo.storage.web.api.v2.SubresourceMismatchException;
-import com.bobo.storage.web.semantic.ResourceController;
 import java.net.URI;
 import java.util.Collection;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-@RequestMapping("/api/v2/playlists/{playlistId}/songs")
-@ResourceController(resource = PlaylistSong.class, respondsWith = PlaylistSongResponse.class)
-public class PlaylistSongsController {
+@RestController
+public class PlaylistSongsController implements PlaylistSongAPI {
 
   private final PlaylistSongService playlistSongs;
 
@@ -38,10 +31,8 @@ public class PlaylistSongsController {
     this.songs = songs;
   }
 
-  /** Add a {@link Song} into a {@link Playlist}. */
-  @PostMapping
-  public ResponseEntity<PlaylistSongResponse> createPlaylistSong(
-      @PathVariable int playlistId, @RequestBody int songId) {
+  @Override
+  public ResponseEntity<PlaylistSongResponse> createPlaylistSong(int playlistId, int songId) {
     Playlist playlist =
         playlists
             .find(playlistId)
@@ -61,8 +52,8 @@ public class PlaylistSongsController {
     return ResponseEntity.created(resource).body(response);
   }
 
-  @GetMapping
-  public ResponseEntity<PlaylistSongResponse[]> readPlaylistSongs(@PathVariable int playlistId) {
+  @Override
+  public ResponseEntity<PlaylistSongResponse[]> readPlaylistSongs(int playlistId) {
     Playlist playlist =
         playlists
             .find(playlistId)
@@ -73,9 +64,8 @@ public class PlaylistSongsController {
     return ResponseEntity.ok(response);
   }
 
-  @DeleteMapping("/{songId}")
-  public ResponseEntity<Void> removePlaylistSong(
-      @PathVariable int playlistId, @PathVariable int songId) {
+  @Override
+  public ResponseEntity<Void> removePlaylistSong(int playlistId, int songId) {
     Playlist playlist =
         playlists
             .find(playlistId)

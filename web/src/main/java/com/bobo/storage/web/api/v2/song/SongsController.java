@@ -2,17 +2,13 @@ package com.bobo.storage.web.api.v2.song;
 
 import com.bobo.storage.core.song.Song;
 import com.bobo.storage.core.song.SongService;
-import com.bobo.storage.web.semantic.ResourceController;
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-@RequestMapping("/api/v2/songs")
-@ResourceController(resource = Song.class, respondsWith = SongResponse.class)
-public class SongsController {
+@RestController
+public class SongsController implements SongAPI {
 
   private final SongService songs;
 
@@ -20,8 +16,8 @@ public class SongsController {
     this.songs = songs;
   }
 
-  @PostMapping
-  public ResponseEntity<SongResponse> createSong(@RequestBody SongCreateRequest request) {
+  @Override
+  public ResponseEntity<SongResponse> createSong(SongCreateRequest request) {
     Song song = request.toCreate();
     song = songs.add(song);
     SongResponse response = new SongResponse(song);
