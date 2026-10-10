@@ -1,4 +1,4 @@
-package com.bobo.storage.web.api.v2.song;
+package com.bobo.storage.web.api.song;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -1,4 +1,4 @@
-package com.bobo.storage.web.api.v2.playlist.song;
+package com.bobo.storage.web.api.playlist.song;
 
 import com.bobo.semantic.TechnicalID;
 import com.bobo.storage.core.playlist.Playlist;
@@ -7,8 +7,8 @@ import com.bobo.storage.core.playlist.song.PlaylistSong;
 import com.bobo.storage.core.playlist.song.PlaylistSongService;
 import com.bobo.storage.core.song.Song;
 import com.bobo.storage.core.song.SongService;
-import com.bobo.storage.web.api.v2.ResourceNotFoundException;
-import com.bobo.storage.web.api.v2.SubresourceMismatchException;
+import com.bobo.storage.web.api.ResourceNotFoundException;
+import com.bobo.storage.web.api.SubresourceMismatchException;
 import java.net.URI;
 import java.util.Collection;
 import org.springframework.http.ResponseEntity;

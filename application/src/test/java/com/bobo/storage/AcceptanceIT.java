@@ -81,7 +81,7 @@ public class AcceptanceIT {
 
       // When
       mvc.perform(
-              MockMvcRequestBuilders.post("/api/v2/playlists/{playlistId}/songs", playlist.getId())
+              MockMvcRequestBuilders.post("/playlists/{playlistId}/songs", playlist.getId())
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(requestPayload))
           // Then

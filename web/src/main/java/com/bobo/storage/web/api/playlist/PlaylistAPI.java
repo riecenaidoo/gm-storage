@@ -1,4 +1,4 @@
-package com.bobo.storage.web.api.v2.playlist;
+package com.bobo.storage.web.api.playlist;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;

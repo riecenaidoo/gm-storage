@@ -1,4 +1,4 @@
-package com.bobo.storage.web.api.v2.playlist.song;
+package com.bobo.storage.web.api.playlist.song;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -23,8 +23,8 @@ import com.bobo.storage.core.song.Song;
 import com.bobo.storage.core.song.SongMother;
 import com.bobo.storage.core.song.SongService;
 import com.bobo.storage.web.WebTestApplication;
-import com.bobo.storage.web.api.v2.ControllerExceptionHandler;
-import com.bobo.storage.web.api.v2.song.SongResponse;
+import com.bobo.storage.web.api.ControllerExceptionHandler;
+import com.bobo.storage.web.api.song.SongResponse;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -92,7 +92,7 @@ class PlaylistSongsControllerIT {
     String expectedPayload = mapper.writeValueAsString(expectedResponse);
     String expectedURI =
         String.format(
-            "%s/api/v2/playlists/%d/songs/%d",
+            "%s/playlists/%d/songs/%d",
             WebTestApplication.testSchemeAuthority(), playlist.getId(), id);
 
     when(playlists.find(playlist.getId())).thenReturn(Optional.of(playlist));
@@ -106,7 +106,7 @@ class PlaylistSongsControllerIT {
 
     // When
     mvc.perform(
-            post("/api/v2/playlists/{playlistId}/songs", playlist.getId())
+            post("/playlists/{playlistId}/songs", playlist.getId())
                 .with(WebTestApplication::testSchemeAuthority)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestPayload))
@@ -142,7 +142,7 @@ class PlaylistSongsControllerIT {
     when(playlistSongs.getFromPlaylist(playlist)).thenReturn(List.of(allPlaylistSongs));
 
     // When
-    mvc.perform(get("/api/v2/playlists/{playlistId}/songs", playlist.getId()))
+    mvc.perform(get("/playlists/{playlistId}/songs", playlist.getId()))
         // Then
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -165,7 +165,7 @@ class PlaylistSongsControllerIT {
     when(playlistSongs.find(id)).thenReturn(Optional.of(playlistSong));
 
     // When
-    mvc.perform(delete("/api/v2/playlists/{playlistId}/songs/{songId}", playlistId, id))
+    mvc.perform(delete("/playlists/{playlistId}/songs/{songId}", playlistId, id))
         // Then
         .andExpect(status().isNoContent())
         .andExpect(header().doesNotExist("content-type"));

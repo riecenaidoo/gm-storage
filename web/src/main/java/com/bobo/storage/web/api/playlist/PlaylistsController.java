@@ -1,9 +1,9 @@
-package com.bobo.storage.web.api.v2.playlist;
+package com.bobo.storage.web.api.playlist;
 
 import com.bobo.storage.core.playlist.Playlist;
 import com.bobo.storage.core.playlist.PlaylistService;
-import com.bobo.storage.web.api.v2.RequestConstraintViolationException;
-import com.bobo.storage.web.api.v2.ResourceNotFoundException;
+import com.bobo.storage.web.api.RequestConstraintViolationException;
+import com.bobo.storage.web.api.ResourceNotFoundException;
 import java.net.URI;
 import java.util.Collection;
 import org.springframework.http.ResponseEntity;

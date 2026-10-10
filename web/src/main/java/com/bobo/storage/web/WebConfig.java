@@ -11,13 +11,13 @@ class WebConfig implements WebMvcConfigurer {
   /**
    * @implNote In future, we should define a {@code Properties} object for the {@code web} module
    *     and define our defaults there. We would want to have a flexible signature here and allow
-   *     CORS for multiple client urls.
+   *     CORS for multiple client URLs.
    */
   @Value("${app.client.url}")
   private String clientUrl;
 
   @Override
   public void addCorsMappings(CorsRegistry registry) {
-    registry.addMapping("/api/v2/**").allowedMethods("*").allowedOrigins(clientUrl);
+    registry.addMapping("/**").allowedMethods("*").allowedOrigins(clientUrl);
   }
 }

@@ -1,4 +1,4 @@
-package com.bobo.storage.web.api.v2.playlist.song;
+package com.bobo.storage.web.api.playlist.song;
 
 import com.bobo.storage.core.playlist.Playlist;
 import com.bobo.storage.core.song.Song;

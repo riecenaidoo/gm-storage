@@ -1,7 +1,7 @@
-package com.bobo.storage.web.api.v2.playlist.song;
+package com.bobo.storage.web.api.playlist.song;
 
 import com.bobo.storage.core.playlist.song.PlaylistSong;
-import com.bobo.storage.web.api.v2.song.SongResponse;
+import com.bobo.storage.web.api.song.SongResponse;
 
 public record PlaylistSongResponse(Integer id, SongResponse songResponse) {
 
