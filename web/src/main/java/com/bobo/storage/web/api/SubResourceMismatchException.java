@@ -9,7 +9,7 @@ import com.bobo.semantic.TechnicalID;
  * <p>Both resources exist, but they are not related as expected; the assumption about their
  * relationship is incorrect.
  */
-public class SubresourceMismatchException extends RuntimeException {
+public class SubResourceMismatchException extends RuntimeException {
 
   private final String resourceName;
 
@@ -19,7 +19,7 @@ public class SubresourceMismatchException extends RuntimeException {
 
   private final String subResourceIdentifier;
 
-  public SubresourceMismatchException(TechnicalID<?> resource, TechnicalID<?> subResource) {
+  public SubResourceMismatchException(TechnicalID<?> resource, TechnicalID<?> subResource) {
     this.resourceName = resource.getClass().getSimpleName();
     this.identifier = resource.getId().toString();
     this.subResourceName = subResource.getClass().getSimpleName();

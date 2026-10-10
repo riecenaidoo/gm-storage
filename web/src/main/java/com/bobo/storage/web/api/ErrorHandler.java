@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
  * @see <a href="https://spring.io/blog/2013/11/01/exception-handling-in-spring-mvc">Exception
  *     Handling in Spring MVC</a>
  */
-@ControllerAdvice(name = "v2Handler")
-public class ControllerExceptionHandler {
+@ControllerAdvice
+public class ErrorHandler {
 
   /**
    * Returns {@code 400 Bad Request} if the request violates the contractual constraints defined in
@@ -63,8 +63,8 @@ public class ControllerExceptionHandler {
    *       subresource of the {@code Playlist} with the songId {@code 1}.
    * </ol>
    */
-  @ExceptionHandler(SubresourceMismatchException.class)
-  public ProblemDetail subresourceMismatch(SubresourceMismatchException subresourceMismatch) {
+  @ExceptionHandler(SubResourceMismatchException.class)
+  public ProblemDetail subresourceMismatch(SubResourceMismatchException subresourceMismatch) {
     String detail =
         "The %s(ID:%s) resource in the request path does not exist within the %s(ID:%s) resource."
             .formatted(

@@ -16,9 +16,7 @@ public class ResourceNotFoundException extends RuntimeException {
   private final String identifier;
 
   public <T extends TechnicalID<ID>, ID> ResourceNotFoundException(Class<T> resource, ID id) {
-    this.resourceName =
-        resource.getSimpleName(); // TODO [design] Resource#getName() - allow a Resource to override
-    // this.
+    this.resourceName = resource.getSimpleName();
     this.identifier = id.toString();
   }
 

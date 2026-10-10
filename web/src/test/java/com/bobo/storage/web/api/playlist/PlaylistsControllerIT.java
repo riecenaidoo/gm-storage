@@ -20,7 +20,7 @@ import com.bobo.storage.core.playlist.PlaylistMother;
 import com.bobo.storage.core.playlist.PlaylistService;
 import com.bobo.storage.core.semantic.EntityMother;
 import com.bobo.storage.web.WebTestApplication;
-import com.bobo.storage.web.api.ControllerExceptionHandler;
+import com.bobo.storage.web.api.ErrorHandler;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -45,7 +45,7 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import tools.jackson.databind.ObjectMapper;
 
-@IntegrationTest({PlaylistsController.class, ObjectMapper.class, ControllerExceptionHandler.class})
+@IntegrationTest({PlaylistsController.class, ObjectMapper.class, ErrorHandler.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @WebMvcTest(PlaylistsController.class)
 class PlaylistsControllerIT {

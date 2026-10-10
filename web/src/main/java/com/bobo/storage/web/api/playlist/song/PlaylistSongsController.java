@@ -8,7 +8,7 @@ import com.bobo.storage.core.playlist.song.PlaylistSongService;
 import com.bobo.storage.core.song.Song;
 import com.bobo.storage.core.song.SongService;
 import com.bobo.storage.web.api.ResourceNotFoundException;
-import com.bobo.storage.web.api.SubresourceMismatchException;
+import com.bobo.storage.web.api.SubResourceMismatchException;
 import java.net.URI;
 import java.util.Collection;
 import org.springframework.http.ResponseEntity;
@@ -75,7 +75,7 @@ public class PlaylistSongsController implements PlaylistSongAPI {
             .find(songId)
             .orElseThrow(() -> new ResourceNotFoundException(PlaylistSong.class, songId));
     if (!TechnicalID.same(playlist, playlistSong.getPlaylist())) {
-      throw new SubresourceMismatchException(playlist, playlistSong);
+      throw new SubResourceMismatchException(playlist, playlistSong);
     }
     playlistSongs.delete(playlistSong);
     return ResponseEntity.noContent().build();
