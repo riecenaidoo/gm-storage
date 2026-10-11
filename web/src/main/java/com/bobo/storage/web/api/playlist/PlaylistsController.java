@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
-public class PlaylistsController implements PlaylistAPI {
+class PlaylistsController implements PlaylistAPI {
 
   private final PlaylistService playlists;
 
-  public PlaylistsController(PlaylistService playlists) {
+  PlaylistsController(PlaylistService playlists) {
     this.playlists = playlists;
   }
 

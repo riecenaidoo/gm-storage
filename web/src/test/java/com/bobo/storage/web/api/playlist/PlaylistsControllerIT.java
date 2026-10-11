@@ -20,7 +20,6 @@ import com.bobo.storage.core.playlist.PlaylistMother;
 import com.bobo.storage.core.playlist.PlaylistService;
 import com.bobo.storage.core.semantic.EntityMother;
 import com.bobo.storage.web.WebTestApplication;
-import com.bobo.storage.web.api.ErrorHandler;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -45,7 +44,7 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import tools.jackson.databind.ObjectMapper;
 
-@IntegrationTest({PlaylistsController.class, ObjectMapper.class, ErrorHandler.class})
+@IntegrationTest({PlaylistsController.class, ObjectMapper.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @WebMvcTest(PlaylistsController.class)
 class PlaylistsControllerIT {
@@ -221,7 +220,7 @@ class PlaylistsControllerIT {
     Integer id = playlist.getId();
 
     String anotherValidName = mother.withNames().get().getName();
-    PlaylistPatchRequest request = new PlaylistPatchRequest(Optional.of(anotherValidName));
+    PlaylistPatchRequest request = new PlaylistPatchRequest(anotherValidName);
     String payload = mapper.writeValueAsString(request);
 
     Playlist updatedPlaylist = request.patch(new Playlist(playlist));
@@ -281,7 +280,7 @@ class PlaylistsControllerIT {
     requests.add(new TestSourceRequest("DELETE /playlists/{id}", delete("/playlists/{id}", id)));
 
     String validPlaylistName = new PlaylistMother(random).withNames().get().getName();
-    PlaylistPatchRequest patchRequest = new PlaylistPatchRequest(Optional.of(validPlaylistName));
+    PlaylistPatchRequest patchRequest = new PlaylistPatchRequest(validPlaylistName);
     String patchPayload = mapper.writeValueAsString(patchRequest);
     var patch =
         patch("/playlists/{id}", id).contentType(MediaType.APPLICATION_JSON).content(patchPayload);

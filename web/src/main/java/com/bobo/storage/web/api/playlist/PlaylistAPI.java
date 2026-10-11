@@ -1,5 +1,9 @@
 package com.bobo.storage.web.api.playlist;
 
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,25 +14,27 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+@Tag(name = "Playlists")
 @RequestMapping("/playlists")
-public interface PlaylistAPI {
+interface PlaylistAPI {
 
   @PostMapping
-  ResponseEntity<PlaylistResponse> createPlaylist(@RequestBody PlaylistCreateRequest request);
+  @ApiResponse(responseCode = "201")
+  ResponseEntity<@Valid PlaylistResponse> createPlaylist(
+      @Valid @RequestBody PlaylistCreateRequest request);
 
-  /**
-   * @return zero or more {@code Playlists}.
-   */
   @GetMapping
-  ResponseEntity<PlaylistResponse[]> readPlaylists(@ModelAttribute PlaylistFilterQuery filters);
+  ResponseEntity<@Valid PlaylistResponse[]> readPlaylists(
+      @Valid @ParameterObject @ModelAttribute PlaylistFilterQuery filters);
 
   @GetMapping("/{id}")
-  ResponseEntity<PlaylistResponse> readPlaylist(@PathVariable("id") int id);
+  ResponseEntity<@Valid PlaylistResponse> readPlaylist(@PathVariable("id") int id);
 
   @PatchMapping("/{id}")
-  ResponseEntity<PlaylistResponse> updatePlaylist(
-      @PathVariable("id") int id, @RequestBody PlaylistPatchRequest request);
+  ResponseEntity<@Valid PlaylistResponse> updatePlaylist(
+      @PathVariable("id") int id, @Valid @RequestBody PlaylistPatchRequest request);
 
   @DeleteMapping("/{id}")
+  @ApiResponse(responseCode = "204")
   ResponseEntity<Void> deletePlaylist(@PathVariable("id") int id);
 }

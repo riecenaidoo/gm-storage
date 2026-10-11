@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
-public class PlaylistSongsController implements PlaylistSongAPI {
+class PlaylistSongsController implements PlaylistSongAPI {
 
   private final PlaylistSongService playlistSongs;
 
@@ -24,7 +24,7 @@ public class PlaylistSongsController implements PlaylistSongAPI {
 
   private final SongService songs;
 
-  public PlaylistSongsController(
+  PlaylistSongsController(
       PlaylistService playlists, PlaylistSongService playlistSongs, SongService songs) {
     this.playlistSongs = playlistSongs;
     this.playlists = playlists;
@@ -32,13 +32,16 @@ public class PlaylistSongsController implements PlaylistSongAPI {
   }
 
   @Override
-  public ResponseEntity<PlaylistSongResponse> createPlaylistSong(int playlistId, int songId) {
+  public ResponseEntity<PlaylistSongResponse> createPlaylistSong(
+      int playlistId, PlaylistSongPostRequest request) {
     Playlist playlist =
         playlists
             .find(playlistId)
             .orElseThrow(() -> new ResourceNotFoundException(Playlist.class, playlistId));
     Song song =
-        songs.find(songId).orElseThrow(() -> new ResourceNotFoundException(Song.class, songId));
+        songs
+            .find(request.songId())
+            .orElseThrow(() -> new ResourceNotFoundException(Song.class, request.songId()));
 
     PlaylistSong playlistSong = new PlaylistSong(playlist, song);
 
@@ -65,15 +68,15 @@ public class PlaylistSongsController implements PlaylistSongAPI {
   }
 
   @Override
-  public ResponseEntity<Void> removePlaylistSong(int playlistId, int songId) {
+  public ResponseEntity<Void> removePlaylistSong(int playlistId, int id) {
     Playlist playlist =
         playlists
             .find(playlistId)
             .orElseThrow(() -> new ResourceNotFoundException(Playlist.class, playlistId));
     PlaylistSong playlistSong =
         playlistSongs
-            .find(songId)
-            .orElseThrow(() -> new ResourceNotFoundException(PlaylistSong.class, songId));
+            .find(id)
+            .orElseThrow(() -> new ResourceNotFoundException(PlaylistSong.class, id));
     if (!TechnicalID.same(playlist, playlistSong.getPlaylist())) {
       throw new SubResourceMismatchException(playlist, playlistSong);
     }

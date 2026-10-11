@@ -23,7 +23,6 @@ import com.bobo.storage.core.song.Song;
 import com.bobo.storage.core.song.SongMother;
 import com.bobo.storage.core.song.SongService;
 import com.bobo.storage.web.WebTestApplication;
-import com.bobo.storage.web.api.ErrorHandler;
 import com.bobo.storage.web.api.song.SongResponse;
 import java.util.Arrays;
 import java.util.List;
@@ -38,7 +37,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
-@IntegrationTest({PlaylistSongsController.class, ObjectMapper.class, ErrorHandler.class})
+@IntegrationTest({PlaylistSongsController.class, ObjectMapper.class})
 @WebMvcTest(PlaylistSongsController.class)
 class PlaylistSongsControllerIT {
 
@@ -71,7 +70,7 @@ class PlaylistSongsControllerIT {
   }
 
   /**
-   * @see PlaylistSongsController#createPlaylistSong(int, int)
+   * @see PlaylistSongsController#createPlaylistSong(int, PlaylistSongPostRequest)
    */
   @DisplayName("POST /playlists/{playlistId}/songs")
   @Test
@@ -80,7 +79,7 @@ class PlaylistSongsControllerIT {
     Playlist playlist = new PlaylistMother(random).withIds().get();
     Song song = new SongMother(random).withIds().get();
 
-    int request = song.getId();
+    var request = new PlaylistSongPostRequest(song.getId());
     String requestPayload = mapper.writeValueAsString(request);
 
     final int id = random.nextInt(1, 101);

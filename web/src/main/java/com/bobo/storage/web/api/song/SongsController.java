@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
-public class SongsController implements SongAPI {
+class SongsController implements SongAPI {
 
   private final SongService songs;
 
-  public SongsController(SongService songs) {
+  SongsController(SongService songs) {
     this.songs = songs;
   }
 

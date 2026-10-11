@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
  *     Handling in Spring MVC</a>
  */
 @ControllerAdvice
-public class ErrorHandler {
+class ErrorHandler {
 
   /**
    * Returns {@code 400 Bad Request} if the request violates the contractual constraints defined in
@@ -23,7 +23,7 @@ public class ErrorHandler {
    * @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-15.5.1">400 Bad Request</a>
    */
   @ExceptionHandler(RequestConstraintViolationException.class)
-  public ProblemDetail requestConstraintViolation(
+  ProblemDetail requestConstraintViolation(
       RequestConstraintViolationException requestConstraintViolation) {
     ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
     problemDetail.setDetail(requestConstraintViolation.getMessage());
@@ -45,7 +45,7 @@ public class ErrorHandler {
    * </ul>
    */
   @ExceptionHandler(ResourceNotFoundException.class)
-  public ProblemDetail resourceNotFound(ResourceNotFoundException resourceNotFound) {
+  ProblemDetail resourceNotFound(ResourceNotFoundException resourceNotFound) {
     String detail =
         "The %s(ID:%s) resource in the request path does not exist."
             .formatted(resourceNotFound.getResourceName(), resourceNotFound.getIdentifier());
@@ -64,7 +64,7 @@ public class ErrorHandler {
    * </ol>
    */
   @ExceptionHandler(SubResourceMismatchException.class)
-  public ProblemDetail subresourceMismatch(SubResourceMismatchException subresourceMismatch) {
+  ProblemDetail subresourceMismatch(SubResourceMismatchException subresourceMismatch) {
     String detail =
         "The %s(ID:%s) resource in the request path does not exist within the %s(ID:%s) resource."
             .formatted(
