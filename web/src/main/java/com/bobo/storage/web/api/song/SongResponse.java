@@ -1,6 +1,7 @@
 package com.bobo.storage.web.api.song;
 
 import com.bobo.storage.core.song.Song;
+import com.bobo.storage.web.semantic.ResponseSchema;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,7 +20,8 @@ public record SongResponse(
     @NotNull @Schema(format = "uri") String url,
     Optional<String> title,
     Optional<String> artist,
-    @Schema(format = "uri") @JsonProperty("thumbnail_url") Optional<String> thumbnailUrl) {
+    @Schema(format = "uri") @JsonProperty("thumbnail_url") Optional<String> thumbnailUrl)
+    implements ResponseSchema {
 
   public SongResponse(Song song) {
     this(song.getId(), song.getUrl(), song.getTitle(), song.getArtist(), song.getThumbnailUrl());

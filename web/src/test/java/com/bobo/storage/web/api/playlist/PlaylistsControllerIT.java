@@ -20,6 +20,7 @@ import com.bobo.storage.core.playlist.PlaylistMother;
 import com.bobo.storage.core.playlist.PlaylistService;
 import com.bobo.storage.core.semantic.EntityMother;
 import com.bobo.storage.web.WebTestApplication;
+import com.bobo.storage.web.api.ErrorHandler;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -44,7 +45,7 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import tools.jackson.databind.ObjectMapper;
 
-@IntegrationTest({PlaylistsController.class, ObjectMapper.class})
+@IntegrationTest({PlaylistsController.class, ErrorHandler.class, ObjectMapper.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @WebMvcTest(PlaylistsController.class)
 class PlaylistsControllerIT {
@@ -76,8 +77,8 @@ class PlaylistsControllerIT {
   /**
    * @see PlaylistsController#createPlaylist(PlaylistCreateRequest)
    */
-  @DisplayName("POST /playlists")
   @Test
+  @DisplayName("POST /playlists")
   void createPlaylist() throws Exception {
     // Given
     String validName = new PlaylistMother(random).withNames().get().getName();
@@ -121,8 +122,8 @@ class PlaylistsControllerIT {
   class ReadPlaylists {
 
     /** The default behaviour is to read all {@code Playlists} when no filter is supplied. */
-    @DisplayName("GET /playlists")
     @Test
+    @DisplayName("GET /playlists")
     void readPlaylists() throws Exception {
       // Given
       Collection<Playlist> allPlaylists = new PlaylistMother(random).withAll().get(5).toList();
@@ -149,8 +150,8 @@ class PlaylistsControllerIT {
      * The repository method is tested, we just want to ensure we are calling the correct query
      * method when we receive the filter parameter.
      */
-    @DisplayName("GET /playlists?title=")
     @Test
+    @DisplayName("GET /playlists?title=")
     void filterByTitle() throws Exception {
       // Given
       String title = "Other";
@@ -169,8 +170,8 @@ class PlaylistsControllerIT {
       verify(playlists, times(0)).get();
     }
 
-    @DisplayName("GET /playlists?title= (title must not be blank)")
     @ParameterizedTest()
+    @DisplayName("GET /playlists?title= (title must not be blank)")
     @ValueSource(strings = {"", " ", "\t", "\n", "    "})
     void filterByBlankTitle(String title) throws Exception {
       // Given
@@ -186,8 +187,8 @@ class PlaylistsControllerIT {
   /**
    * @see PlaylistsController#readPlaylist(int)
    */
-  @DisplayName("GET /playlists/{id}")
   @Test
+  @DisplayName("GET /playlists/{id}")
   void readPlaylist() throws Exception {
     // Given
     PlaylistMother mother = new PlaylistMother(random).withAll();
@@ -211,8 +212,8 @@ class PlaylistsControllerIT {
   /**
    * @see PlaylistsController#updatePlaylist(int, PlaylistPatchRequest)
    */
-  @DisplayName("PATCH /playlists/{id}")
   @Test
+  @DisplayName("PATCH /playlists/{id}")
   void updatePlaylist() throws Exception {
     // Given
     PlaylistMother mother = new PlaylistMother(random).withAll();
@@ -247,8 +248,8 @@ class PlaylistsControllerIT {
   /**
    * @see PlaylistsController#deletePlaylist(int)
    */
-  @DisplayName("DELETE /playlists/{id}")
   @Test
+  @DisplayName("DELETE /playlists/{id}")
   void deletePlaylist() throws Exception {
     // Given
     PlaylistMother mother = new PlaylistMother(random).withIds();
@@ -289,9 +290,9 @@ class PlaylistsControllerIT {
     return requests.stream();
   }
 
+  @ParameterizedTest
   @DisplayName("404 Not Found Routes")
   @MethodSource("playlistRequests")
-  @ParameterizedTest
   void playlistNotFound(TestSourceRequest request) throws Exception {
     // Stubbing
     when(playlists.find(anyInt())).thenReturn(Optional.empty());

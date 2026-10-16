@@ -4,13 +4,13 @@ import com.bobo.storage.core.playlist.Playlist;
 import com.bobo.storage.core.playlist.PlaylistService;
 import com.bobo.storage.web.api.RequestConstraintViolationException;
 import com.bobo.storage.web.api.ResourceNotFoundException;
+import com.bobo.storage.web.semantic.ResourceController;
 import java.net.URI;
 import java.util.Collection;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-@RestController
+@ResourceController
 class PlaylistsController implements PlaylistAPI {
 
   private final PlaylistService playlists;
@@ -26,7 +26,7 @@ class PlaylistsController implements PlaylistAPI {
     PlaylistResponse response = new PlaylistResponse(playlist);
     URI resource =
         ServletUriComponentsBuilder.fromCurrentRequestUri()
-            .path(String.format("/%d", playlist.getId()))
+            .pathSegment(String.valueOf(playlist.getId()))
             .build()
             .toUri();
     return ResponseEntity.created(resource).body(response);

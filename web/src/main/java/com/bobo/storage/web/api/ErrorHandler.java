@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
  *     Handling in Spring MVC</a>
  */
 @ControllerAdvice
-class ErrorHandler {
+public class ErrorHandler {
+
+  ErrorHandler() {}
 
   /**
    * Returns {@code 400 Bad Request} if the request violates the contractual constraints defined in

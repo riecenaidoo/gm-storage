@@ -1,5 +1,6 @@
 package com.bobo.storage.web.api.playlist;
 
+import com.bobo.storage.web.semantic.ResourceAPI;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Tag(name = "Playlists")
 @RequestMapping("/playlists")
-interface PlaylistAPI {
+interface PlaylistAPI extends ResourceAPI {
 
   @PostMapping
   @ApiResponse(responseCode = "201")

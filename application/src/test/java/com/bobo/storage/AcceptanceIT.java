@@ -10,6 +10,7 @@ import com.bobo.storage.core.playlist.PlaylistService;
 import com.bobo.storage.core.song.Song;
 import com.bobo.storage.core.song.SongMother;
 import com.bobo.storage.core.song.SongService;
+import java.util.Map;
 import java.util.Random;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -76,7 +77,7 @@ public class AcceptanceIT {
       // Given
       Song existingSong = songs.add(new SongMother(random).get());
 
-      int request = existingSong.getId();
+      Map<String, Number> request = Map.of("songId", existingSong.getId());
       String requestPayload = mapper.writeValueAsString(request);
 
       // When

@@ -2,12 +2,12 @@ package com.bobo.storage.web.api.song;
 
 import com.bobo.storage.core.song.Song;
 import com.bobo.storage.core.song.SongService;
+import com.bobo.storage.web.semantic.ResourceController;
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-@RestController
+@ResourceController
 class SongsController implements SongAPI {
 
   private final SongService songs;
@@ -23,7 +23,7 @@ class SongsController implements SongAPI {
     SongResponse response = new SongResponse(song);
     URI resource =
         ServletUriComponentsBuilder.fromCurrentRequestUri()
-            .path(String.format("/%d", song.getId()))
+            .pathSegment(String.valueOf(song.getId()))
             .build()
             .toUri();
     return ResponseEntity.created(resource).body(response);

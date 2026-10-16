@@ -8,7 +8,7 @@ without the API needing to be changed.
 Everything is structured around "resources", which are based on the Core module entities we want to expose an API for.
 
 - `*API` interfaces define the available operations for each resource.
-- `*Controller` classes implement the happy-path for these operations, delegating to Core module services, and throw exceptions when errors occur.
+- `*Controller` classes implement the happy-path for these operations, delegating to Core module services, and throwing exceptions when errors occur.
 - `ErrorHandler` implements the error-handling for the API.
 
 Other classes and their purpose are documented in the `semantic` package(s).

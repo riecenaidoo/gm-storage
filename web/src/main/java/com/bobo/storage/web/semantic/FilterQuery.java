@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
  * @apiNote Do not include parameters for pagination or sorting. These should be bound using Spring
  *     {@link PageableDefault @PageableDefault} and/or {@link Pageable}/{@link Sort}, which Spring
  *     has a lot of built-in support for.
- * @param <T> the resource being filtered.
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Query">URI Query |
  *     MDN</a>
  */
-public interface FilterQuery<T> {}
+public interface FilterQuery extends RequestSchema {}

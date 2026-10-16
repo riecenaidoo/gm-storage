@@ -23,6 +23,7 @@ import com.bobo.storage.core.song.Song;
 import com.bobo.storage.core.song.SongMother;
 import com.bobo.storage.core.song.SongService;
 import com.bobo.storage.web.WebTestApplication;
+import com.bobo.storage.web.api.ErrorHandler;
 import com.bobo.storage.web.api.song.SongResponse;
 import java.util.Arrays;
 import java.util.List;
@@ -37,7 +38,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
-@IntegrationTest({PlaylistSongsController.class, ObjectMapper.class})
+@IntegrationTest({PlaylistSongsController.class, ErrorHandler.class, ObjectMapper.class})
 @WebMvcTest(PlaylistSongsController.class)
 class PlaylistSongsControllerIT {
 
@@ -72,8 +73,8 @@ class PlaylistSongsControllerIT {
   /**
    * @see PlaylistSongsController#createPlaylistSong(int, PlaylistSongPostRequest)
    */
-  @DisplayName("POST /playlists/{playlistId}/songs")
   @Test
+  @DisplayName("POST /playlists/{playlistId}/songs")
   void createPlaylistSong() throws Exception {
     // Given
     Playlist playlist = new PlaylistMother(random).withIds().get();
@@ -118,6 +119,7 @@ class PlaylistSongsControllerIT {
    * @see PlaylistSongsController#readPlaylistSongs(int)
    */
   @Test
+  @DisplayName("GET /playlists/{playlistId}/songs")
   void readPlaylistSongs() throws Exception {
     // Given
     Playlist playlist = new PlaylistMother(random).withIds().get();

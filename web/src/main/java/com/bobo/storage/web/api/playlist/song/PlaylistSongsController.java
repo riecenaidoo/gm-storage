@@ -9,13 +9,13 @@ import com.bobo.storage.core.song.Song;
 import com.bobo.storage.core.song.SongService;
 import com.bobo.storage.web.api.ResourceNotFoundException;
 import com.bobo.storage.web.api.SubResourceMismatchException;
+import com.bobo.storage.web.semantic.ResourceController;
 import java.net.URI;
 import java.util.Collection;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-@RestController
+@ResourceController
 class PlaylistSongsController implements PlaylistSongAPI {
 
   private final PlaylistSongService playlistSongs;
@@ -25,7 +25,7 @@ class PlaylistSongsController implements PlaylistSongAPI {
   private final SongService songs;
 
   PlaylistSongsController(
-      PlaylistService playlists, PlaylistSongService playlistSongs, SongService songs) {
+      PlaylistSongService playlistSongs, PlaylistService playlists, SongService songs) {
     this.playlistSongs = playlistSongs;
     this.playlists = playlists;
     this.songs = songs;
@@ -49,7 +49,7 @@ class PlaylistSongsController implements PlaylistSongAPI {
     PlaylistSongResponse response = new PlaylistSongResponse(playlistSong);
     URI resource =
         ServletUriComponentsBuilder.fromCurrentRequestUri()
-            .path(String.format("/%d", playlistSong.getId()))
+            .pathSegment(String.valueOf(playlistSong.getId()))
             .build()
             .toUri();
     return ResponseEntity.created(resource).body(response);
