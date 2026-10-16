@@ -22,12 +22,18 @@
       <version>${project.version}</version>
     </dependency>
 
-    <!--        Web App / REST Controllers-->
+    <!--        Web App-->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
-    <!--        /Web App / REST Controllers-->
+    <dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+      <!--https://springdoc.org/#what-is-the-compatibility-matrix-of-springdoc-openapi-with-spring-boot-->
+      <version>3.1.1</version>
+    </dependency>
+    <!--        /Web App-->
 
     <!--        Testing-->
     <dependency>

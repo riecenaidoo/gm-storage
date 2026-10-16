@@ -1,4 +1,4 @@
-package com.bobo.storage.web.api.v2.controller;
+package com.bobo.storage.web.api.playlist;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyInt;
@@ -20,9 +20,7 @@ import com.bobo.storage.core.playlist.PlaylistMother;
 import com.bobo.storage.core.playlist.PlaylistService;
 import com.bobo.storage.core.semantic.EntityMother;
 import com.bobo.storage.web.WebTestApplication;
-import com.bobo.storage.web.api.v2.request.PlaylistsCreateRequest;
-import com.bobo.storage.web.api.v2.request.PlaylistsPatchRequest;
-import com.bobo.storage.web.api.v2.response.PlaylistResponse;
+import com.bobo.storage.web.api.ErrorHandler;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -47,7 +45,7 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import tools.jackson.databind.ObjectMapper;
 
-@IntegrationTest({PlaylistsController.class, ObjectMapper.class, ControllerExceptionHandler.class})
+@IntegrationTest({PlaylistsController.class, ErrorHandler.class, ObjectMapper.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @WebMvcTest(PlaylistsController.class)
 class PlaylistsControllerIT {
@@ -77,14 +75,14 @@ class PlaylistsControllerIT {
   }
 
   /**
-   * @see PlaylistsController#createPlaylist(PlaylistsCreateRequest)
+   * @see PlaylistsController#createPlaylist(PlaylistCreateRequest)
    */
-  @DisplayName("POST /playlists")
   @Test
+  @DisplayName("POST /playlists")
   void createPlaylist() throws Exception {
     // Given
     String validName = new PlaylistMother(random).withNames().get().getName();
-    PlaylistsCreateRequest request = new PlaylistsCreateRequest(validName);
+    PlaylistCreateRequest request = new PlaylistCreateRequest(validName);
     String requestPayload = mapper.writeValueAsString(request);
 
     final int id = random.nextInt(1, 101);
@@ -92,7 +90,7 @@ class PlaylistsControllerIT {
         new PlaylistResponse(EntityMother.setId(request.toCreate(), id));
     String expectedPayload = mapper.writeValueAsString(expectedResponse);
     String expectedURI =
-        String.format("%s/api/v2/playlists/%d", WebTestApplication.testSchemeAuthority(), id);
+        String.format("%s/playlists/%d", WebTestApplication.testSchemeAuthority(), id);
 
     // Stubbing
     when(playlists.add(any()))
@@ -104,7 +102,7 @@ class PlaylistsControllerIT {
 
     // When
     mvc.perform(
-            post("/api/v2/playlists")
+            post("/playlists")
                 .with(WebTestApplication::testSchemeAuthority)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestPayload))
@@ -118,14 +116,14 @@ class PlaylistsControllerIT {
   }
 
   /**
-   * @see PlaylistsController#readPlaylists(Optional)
+   * @see PlaylistsController#readPlaylists(PlaylistFilterQuery)
    */
   @Nested
   class ReadPlaylists {
 
     /** The default behaviour is to read all {@code Playlists} when no filter is supplied. */
-    @DisplayName("GET /playlists")
     @Test
+    @DisplayName("GET /playlists")
     void readPlaylists() throws Exception {
       // Given
       Collection<Playlist> allPlaylists = new PlaylistMother(random).withAll().get(5).toList();
@@ -138,7 +136,7 @@ class PlaylistsControllerIT {
       when(playlists.get()).thenReturn(allPlaylists);
 
       // When
-      mvc.perform(get("/api/v2/playlists"))
+      mvc.perform(get("/playlists"))
           // Then
           .andExpect(status().isOk())
           .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -152,8 +150,8 @@ class PlaylistsControllerIT {
      * The repository method is tested, we just want to ensure we are calling the correct query
      * method when we receive the filter parameter.
      */
-    @DisplayName("GET /playlists?title=")
     @Test
+    @DisplayName("GET /playlists?title=")
     void filterByTitle() throws Exception {
       // Given
       String title = "Other";
@@ -162,7 +160,7 @@ class PlaylistsControllerIT {
       when(playlists.searchByName(anyString())).thenReturn(List.of());
 
       // When
-      mvc.perform(get("/api/v2/playlists").param("title", title))
+      mvc.perform(get("/playlists").param("title", title))
           // Then
           .andExpect(status().isOk())
           .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -172,15 +170,15 @@ class PlaylistsControllerIT {
       verify(playlists, times(0)).get();
     }
 
-    @DisplayName("GET /playlists?title= (title must not be blank)")
     @ParameterizedTest()
+    @DisplayName("GET /playlists?title= (title must not be blank)")
     @ValueSource(strings = {"", " ", "\t", "\n", "    "})
     void filterByBlankTitle(String title) throws Exception {
       // Given
       Assertions.assertTrue(title.isBlank(), "Test Assumption Failed.");
 
       // When
-      mvc.perform(get("/api/v2/playlists").param("title", title))
+      mvc.perform(get("/playlists").param("title", title))
           // Then
           .andExpect(status().isBadRequest());
     }
@@ -189,8 +187,8 @@ class PlaylistsControllerIT {
   /**
    * @see PlaylistsController#readPlaylist(int)
    */
-  @DisplayName("GET /playlists/{id}")
   @Test
+  @DisplayName("GET /playlists/{id}")
   void readPlaylist() throws Exception {
     // Given
     PlaylistMother mother = new PlaylistMother(random).withAll();
@@ -204,7 +202,7 @@ class PlaylistsControllerIT {
     when(playlists.find(id)).thenReturn(Optional.of(playlist));
 
     // When
-    mvc.perform(get("/api/v2/playlists/{id}", id))
+    mvc.perform(get("/playlists/{id}", id))
         // Then
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -212,10 +210,10 @@ class PlaylistsControllerIT {
   }
 
   /**
-   * @see PlaylistsController#updatePlaylist(int, PlaylistsPatchRequest)
+   * @see PlaylistsController#updatePlaylist(int, PlaylistPatchRequest)
    */
-  @DisplayName("PATCH /playlists{id}")
   @Test
+  @DisplayName("PATCH /playlists/{id}")
   void updatePlaylist() throws Exception {
     // Given
     PlaylistMother mother = new PlaylistMother(random).withAll();
@@ -223,7 +221,7 @@ class PlaylistsControllerIT {
     Integer id = playlist.getId();
 
     String anotherValidName = mother.withNames().get().getName();
-    PlaylistsPatchRequest request = new PlaylistsPatchRequest(Optional.of(anotherValidName));
+    PlaylistPatchRequest request = new PlaylistPatchRequest(anotherValidName);
     String payload = mapper.writeValueAsString(request);
 
     Playlist updatedPlaylist = request.patch(new Playlist(playlist));
@@ -238,9 +236,7 @@ class PlaylistsControllerIT {
 
     // When
     mvc.perform(
-            patch("/api/v2/playlists/{id}", id)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
+            patch("/playlists/{id}", id).contentType(MediaType.APPLICATION_JSON).content(payload))
         // Then
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -252,8 +248,8 @@ class PlaylistsControllerIT {
   /**
    * @see PlaylistsController#deletePlaylist(int)
    */
-  @DisplayName("DELETE /playlists/{id}")
   @Test
+  @DisplayName("DELETE /playlists/{id}")
   void deletePlaylist() throws Exception {
     // Given
     PlaylistMother mother = new PlaylistMother(random).withIds();
@@ -264,7 +260,7 @@ class PlaylistsControllerIT {
     when(playlists.find(id)).thenReturn(Optional.of(playlist));
 
     // When
-    mvc.perform(delete("/api/v2/playlists/{id}", id))
+    mvc.perform(delete("/playlists/{id}", id))
         // Then
         .andExpect(status().isNoContent())
         .andExpect(header().doesNotExist("content-type"));
@@ -281,25 +277,22 @@ class PlaylistsControllerIT {
     final int id = random.nextInt(100);
 
     Collection<TestSourceRequest> requests = new ArrayList<>(3);
-    requests.add(new TestSourceRequest("GET /playlists/{id}", get("/api/v2/playlists/{id}", id)));
-    requests.add(
-        new TestSourceRequest("DELETE /playlists/{id}", delete("/api/v2/playlists/{id}", id)));
+    requests.add(new TestSourceRequest("GET /playlists/{id}", get("/playlists/{id}", id)));
+    requests.add(new TestSourceRequest("DELETE /playlists/{id}", delete("/playlists/{id}", id)));
 
     String validPlaylistName = new PlaylistMother(random).withNames().get().getName();
-    PlaylistsPatchRequest patchRequest = new PlaylistsPatchRequest(Optional.of(validPlaylistName));
+    PlaylistPatchRequest patchRequest = new PlaylistPatchRequest(validPlaylistName);
     String patchPayload = mapper.writeValueAsString(patchRequest);
     var patch =
-        patch("/api/v2/playlists/{id}", id)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(patchPayload);
+        patch("/playlists/{id}", id).contentType(MediaType.APPLICATION_JSON).content(patchPayload);
     requests.add(new TestSourceRequest("PATCH /playlists/{id}", patch));
 
     return requests.stream();
   }
 
+  @ParameterizedTest
   @DisplayName("404 Not Found Routes")
   @MethodSource("playlistRequests")
-  @ParameterizedTest
   void playlistNotFound(TestSourceRequest request) throws Exception {
     // Stubbing
     when(playlists.find(anyInt())).thenReturn(Optional.empty());

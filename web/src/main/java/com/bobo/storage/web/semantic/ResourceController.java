@@ -1,32 +1,23 @@
 package com.bobo.storage.web.semantic;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
+import static java.lang.annotation.ElementType.TYPE;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * A stereotyped {@link RestController} that services exactly one resource, and responds with a
- * consistent representation for the resource, when a response is necessary.
+ * A stereotyped {@link RestController} that implements a {@link ResourceAPI}.
  *
- * <p>The name of the {@code Controller} must reflect the name of the resource it serves. If the
- * resource is a subresource, the name must be prefaced by the first parent of the resource.
+ * <p>Should contain only simple control flow logic to delegate to the relevant Core service(s)
+ * needed to perform the requested operation, mapping the result accordingly into a {@link
+ * ResponseSchema}.
+ *
+ * @implSpec Implementation should be {@code package-private} because it is expected to be managed
+ *     by Spring, and never instantiated or referenced elsewhere in application source code.
  */
-@Target({ElementType.TYPE})
+@Target({TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Documented
 @RestController
-public @interface ResourceController {
-
-  /**
-   * @return the type of resource the {@code Controller} handles requests for.
-   */
-  Class<?> resource();
-
-  /**
-   * @return the representation of the resource the {@code Controller} will serve, when requested.
-   */
-  Class<?> respondsWith();
-}
+public @interface ResourceController {}

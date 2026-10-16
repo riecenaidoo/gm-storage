@@ -1,17 +1,21 @@
 package com.bobo.storage.web.semantic;
 
 /**
- * A {@code POST Request} that creates a resource.
+ * A {@code POST} request that creates a resource.
  *
- * @param <C> the type resource this {@code Request} produces; its creation.
+ * @param <T> the type resource this request produces; its creation.
  */
-public interface CreateRequest<C> {
+public interface CreateRequest<T> extends RequestSchema {
 
   /**
-   * TODO [design] possibly throw 422 Unprocessable Content if the construction of the resource
-   * fails.
+   * Construct a resource from the request payload.
    *
-   * @return a representation of the desired resource this request wishes to create.
+   * @apiNote The implementation is expected to be a simple delegation to a constructor or factory
+   *     method. It takes no args, because the request should contain all the necessary information
+   *     to perform the construction. If additional information is needed, or the construction is
+   *     not straightforward, then use a basic {@link RequestSchema} and perform construction in a
+   *     {@link ResourceController}.
+   * @return a valid, but transient resource.
    */
-  C toCreate();
+  T toCreate();
 }

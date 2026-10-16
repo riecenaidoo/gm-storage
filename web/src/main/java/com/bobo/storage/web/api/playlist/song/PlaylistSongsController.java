@@ -1,4 +1,4 @@
-package com.bobo.storage.web.api.v2.controller;
+package com.bobo.storage.web.api.playlist.song;
 
 import com.bobo.semantic.TechnicalID;
 import com.bobo.storage.core.playlist.Playlist;
@@ -6,59 +6,57 @@ import com.bobo.storage.core.playlist.PlaylistService;
 import com.bobo.storage.core.playlist.song.PlaylistSong;
 import com.bobo.storage.core.playlist.song.PlaylistSongService;
 import com.bobo.storage.core.song.Song;
-import com.bobo.storage.web.api.v2.request.SongsCreateRequest;
-import com.bobo.storage.web.api.v2.response.PlaylistSongResponse;
+import com.bobo.storage.core.song.SongService;
+import com.bobo.storage.web.api.ResourceNotFoundException;
+import com.bobo.storage.web.api.SubResourceMismatchException;
 import com.bobo.storage.web.semantic.ResourceController;
 import java.net.URI;
 import java.util.Collection;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-@RequestMapping("/api/v2/playlists/{playlistId}/songs")
-@ResourceController(resource = PlaylistSong.class, respondsWith = PlaylistSongResponse.class)
-public class PlaylistSongsController {
+@ResourceController
+class PlaylistSongsController implements PlaylistSongAPI {
 
   private final PlaylistSongService playlistSongs;
 
   private final PlaylistService playlists;
 
-  public PlaylistSongsController(PlaylistService playlists, PlaylistSongService playlistSongs) {
+  private final SongService songs;
+
+  PlaylistSongsController(
+      PlaylistSongService playlistSongs, PlaylistService playlists, SongService songs) {
     this.playlistSongs = playlistSongs;
     this.playlists = playlists;
+    this.songs = songs;
   }
 
-  /**
-   * Create a {@link Song} within a {@link Playlist}.
-   *
-   * @param playlistId of the {@code Playlist} to create the {@code Song} within.
-   * @param request to create a {@code Song}.
-   */
-  @PostMapping
+  @Override
   public ResponseEntity<PlaylistSongResponse> createPlaylistSong(
-      @PathVariable int playlistId, @RequestBody SongsCreateRequest request) {
+      int playlistId, PlaylistSongPostRequest request) {
     Playlist playlist =
         playlists
             .find(playlistId)
             .orElseThrow(() -> new ResourceNotFoundException(Playlist.class, playlistId));
-    PlaylistSong playlistSong = new PlaylistSong(playlist, request.toCreate());
+    Song song =
+        songs
+            .find(request.songId())
+            .orElseThrow(() -> new ResourceNotFoundException(Song.class, request.songId()));
+
+    PlaylistSong playlistSong = new PlaylistSong(playlist, song);
+
     playlistSong = playlistSongs.add(playlistSong);
     PlaylistSongResponse response = new PlaylistSongResponse(playlistSong);
     URI resource =
         ServletUriComponentsBuilder.fromCurrentRequestUri()
-            .path(String.format("/%d", playlistSong.getId()))
+            .pathSegment(String.valueOf(playlistSong.getId()))
             .build()
             .toUri();
     return ResponseEntity.created(resource).body(response);
   }
 
-  @GetMapping
-  public ResponseEntity<PlaylistSongResponse[]> readPlaylistSongs(@PathVariable int playlistId) {
+  @Override
+  public ResponseEntity<PlaylistSongResponse[]> readPlaylistSongs(int playlistId) {
     Playlist playlist =
         playlists
             .find(playlistId)
@@ -69,9 +67,8 @@ public class PlaylistSongsController {
     return ResponseEntity.ok(response);
   }
 
-  @DeleteMapping("/{id}")
-  public ResponseEntity<Void> removePlaylistSong(
-      @PathVariable int playlistId, @PathVariable int id) {
+  @Override
+  public ResponseEntity<Void> removePlaylistSong(int playlistId, int id) {
     Playlist playlist =
         playlists
             .find(playlistId)
@@ -81,7 +78,7 @@ public class PlaylistSongsController {
             .find(id)
             .orElseThrow(() -> new ResourceNotFoundException(PlaylistSong.class, id));
     if (!TechnicalID.same(playlist, playlistSong.getPlaylist())) {
-      throw new SubresourceMismatchException(playlist, playlistSong);
+      throw new SubResourceMismatchException(playlist, playlistSong);
     }
     playlistSongs.delete(playlistSong);
     return ResponseEntity.noContent().build();

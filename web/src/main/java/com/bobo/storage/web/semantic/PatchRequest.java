@@ -10,7 +10,7 @@ import org.springframework.http.HttpMethod;
  * @see Consumer
  * @see HttpMethod#PATCH
  */
-public interface PatchRequest<T> {
+public interface PatchRequest<T> extends RequestSchema {
 
   /**
    * Applies the {@code PATCH} to a {@code Resource}.

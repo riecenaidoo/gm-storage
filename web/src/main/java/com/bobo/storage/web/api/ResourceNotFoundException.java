@@ -1,4 +1,4 @@
-package com.bobo.storage.web.api.v2.controller;
+package com.bobo.storage.web.api;
 
 import com.bobo.semantic.TechnicalID;
 import java.util.Optional;
@@ -16,9 +16,7 @@ public class ResourceNotFoundException extends RuntimeException {
   private final String identifier;
 
   public <T extends TechnicalID<ID>, ID> ResourceNotFoundException(Class<T> resource, ID id) {
-    this.resourceName =
-        resource.getSimpleName(); // TODO [design] Resource#getName() - allow a Resource to override
-    // this.
+    this.resourceName = resource.getSimpleName();
     this.identifier = id.toString();
   }
 

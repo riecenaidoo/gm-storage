@@ -1,4 +1,4 @@
-package com.bobo.storage.web.api.v2.controller;
+package com.bobo.storage.web.api;
 
 /**
  * Thrown when a syntactically valid request was received, but failed one or more contract-defined
