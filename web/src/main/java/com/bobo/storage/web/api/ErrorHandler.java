@@ -41,8 +41,8 @@ public class ErrorHandler {
    *
    * <ul>
    *   <li>e.g. {@code PATCH /playlists/1} requesting a {@code PATCH} operation on the {@code
-   *       Playlist} with the songId {@code 1}, but it does not exist.
-   *   <li>e.g. {@code /playlists/1/songs/4} implying the {@code Playlist} with the songId {@code 1}
+   *       Playlist} with the id {@code 1}, but it does not exist.
+   *   <li>e.g. {@code /playlists/1/songs/4} implying the {@code Playlist} with the id {@code 1}
    *       exists, but it did not.
    * </ul>
    */
@@ -61,8 +61,8 @@ public class ErrorHandler {
    *
    * <ol>
    *   <li>e.g. {@code DELETE /playlists/1/songs/4} requesting a {@code DELETE} operation on the
-   *       {@code PlaylistSong} with the songId {@code 4}, which does exist, but not as a
-   *       subresource of the {@code Playlist} with the songId {@code 1}.
+   *       {@code PlaylistSong} with the id {@code 4}, which does exist, but not as a subresource of
+   *       the {@code Playlist} with the id {@code 1}.
    * </ol>
    */
   @ExceptionHandler(SubResourceMismatchException.class)
